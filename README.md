@@ -3,7 +3,7 @@
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## ✨ Align
+## ✨ Alignment Toolkit
 
 Feather is an alignment framework for protecting LLM responses and aligning Reasoning Language Models (RLMs) like DeepSeek. With Feather, you can simplify reward engineering, evaluations, and guardrails to tailor model behavior and ensure safe, aligned outputs that match your business objectives through Alignment Fine-Tuning (AFT).
 
