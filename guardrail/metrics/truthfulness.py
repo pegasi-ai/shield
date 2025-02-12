@@ -1,2 +1,0 @@
-# HALTT4LLM
-# HaluEval
