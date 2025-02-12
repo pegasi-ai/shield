@@ -12,7 +12,7 @@ Feather is an alignment framework for protecting LLM responses and aligning Reas
 - 📚 Guardrails: To ensure safe and responsible outputs, Prevent harmful or undesirable responses. Enforce strict compliance with business rules. 
 
 ## ⚡ Get Started
-1. Grab your API key here: app.pegasi.ai
+1. **Grab your API key here:** [app.pegasi.ai](https://app.pegasi.ai)
 2. Quickstart Evals notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/github/your-username/your-repo/blob/main/your_notebook.ipynb](https://colab.research.google.com/drive/1vaBaDhBPwMaddvq22Gg_Z8gt7z3_bblU?usp=sharing))
 3. Alignment-Tuning notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/1CaWTfk-D1Oahee3KjUtVnly6Fv_VkM-I?usp=sharing](https://colab.research.google.com/drive/1vaBaDhBPwMaddvq22Gg_Z8gt7z3_bblU?usp=sharing))
 
