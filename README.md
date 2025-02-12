@@ -9,7 +9,7 @@ Feather is an alignment framework for protecting LLM responses and aligning Reas
 
 - 🤝 Alignment Reward Functions: Central to guiding and optimizing model behavior, ensuring that both the reasoning process and the outputs align with your intended goals.
 - 🧪 Evaluations: Provide quantitative and qualitative metrics to assess the effectiveness of your alignment strategies, enabling continuous improvement.
-- 📚 Colab Notebooks: optimized for free T4 GPU to get started
+- 📚 Regression Testing: Test against holdout datasets to evaluate experiments in improving your RLMs
 
 ## ✨ Enterprise Edition
 - Domain-specific LLMs as a Judge
