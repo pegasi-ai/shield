@@ -3,7 +3,7 @@
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## ✨ Alignment Toolkit
+## ✨ AI Testing Framework
 
 Feather is an open-source testing framework for validating LLM responses and evaluating Reasoning Language Models (RLMs) like DeepSeek. With Feather, you can implement robust testing suites, automated evaluations, and basic guardrails to assess model behavior and ensure outputs align with your requirements.
 
