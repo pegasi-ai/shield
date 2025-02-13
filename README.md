@@ -5,12 +5,12 @@
 
 ## ✨ AI Testing Framework
 
-Feather is an open-source testing framework for validating LLM responses and evaluating Reasoning Language Models (RLMs) like DeepSeek. With Feather, you can implement robust testing suites, automated evaluations, and basic guardrails to assess model behavior and ensure outputs align with your requirements.
+Feather is an open-source framework for statistical testing and validation of LLM outputs and behaviors. With Feather, you can implement comprehensive test suites, automated evaluations, and behavioral checks to ensure your AI applications perform reliably and align with specified requirements.
 
 ## 🔍 Core Features
-📊 Statistical Testing: Comprehensive testing suite for model behavior validation
-✍️ Evaluations: Quantitative and qualitative metrics to measure model performance
-🛡️ Basic Guardrails: Simple safety checks and output validation
+- 📊 Statistical Testing: Comprehensive testing suite for model behavior validation
+- ✍️ Evaluations: Quantitative and qualitative metrics to measure model performance
+- 🛡️ Basic Guardrails: Simple safety checks and output validation
 
 ## ⚡ Get Started
 1. **Grab your API key here:** [app.pegasi.ai](https://app.pegasi.ai)
