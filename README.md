@@ -5,7 +5,7 @@
 
 ## ✨ AI Testing Framework
 
-Feather is an open-source framework for statistical testing and validation of LLM outputs and behaviors. With Feather, you can implement comprehensive test suites, automated evaluations, and behavioral checks to ensure your AI applications perform reliably and align with specified requirements.
+Feather is a lightweight framework for statistical testing and validation of LLM outputs and behaviors. With Feather, you can implement comprehensive test suites, automated evaluations, and behavioral checks to ensure your AI applications perform reliably and align with specified requirements.
 
 ## 🔍 Core Features
 - 📊 Statistical Testing: Comprehensive testing suite for model behavior validation
