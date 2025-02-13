@@ -5,11 +5,12 @@
 
 ## ✨ Alignment Toolkit
 
-Feather is an alignment framework for protecting LLM responses and aligning Reasoning Language Models (RLMs) like DeepSeek. With Feather, you can simplify reward engineering, evaluations, and guardrails to tailor model behavior and ensure safe, aligned outputs that match your business objectives through Alignment Fine-Tuning (AFT).
+Feather is an open-source testing framework for validating LLM responses and evaluating Reasoning Language Models (RLMs) like DeepSeek. With Feather, you can implement robust testing suites, automated evaluations, and basic guardrails to assess model behavior and ensure outputs align with your requirements.
 
-- 🤝 Alignment Reward Functions: Central to guiding and optimizing model behavior, ensuring that both the reasoning process and the outputs align with your intended goals.
-- 🧪 Evaluations: Provide quantitative and qualitative metrics to assess the effectiveness of your alignment strategies, enabling continuous improvement.
-- 📚 Guardrails: To ensure safe and responsible outputs, prevent harmful or undesirable responses. Enforce strict compliance with business rules. 
+## 🔍 Core Features
+📊 Statistical Testing: Comprehensive testing suite for model behavior validation
+✍️ Evaluations: Quantitative and qualitative metrics to measure model performance
+🛡️ Basic Guardrails: Simple safety checks and output validation
 
 ## ⚡ Get Started
 1. **Grab your API key here:** [app.pegasi.ai](https://app.pegasi.ai)
