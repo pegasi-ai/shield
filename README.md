@@ -17,8 +17,11 @@
 Pegasi Shield sits between your application and any LLM (OpenAI, Claude, local models, etc.).  
 It inspects every prompt and response, blocks or edits unsafe content, and logs decisions for auditing—all with minimal latency and no data egress.
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17Dq4ClbxI-AIjpQM2MxiLeoLnmfxTqrR?usp=sharing)
-
+<a href="https://colab.research.google.com/drive/17Dq4ClbxI-AIjpQM2MxiLeoLnmfxTqrR?usp=sharing"
+   target="_blank" rel="noopener noreferrer">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg"
+       alt="Open in Colab"/>
+</a>
 ---
 
 ## 🔬 Research: FRED
@@ -27,7 +30,11 @@ Pegasi Shield’s hallucination module is powered by **FRED — Financial Retri
 The method was peer‑reviewed and accepted to the *ICML 2025 Workshop*.
 Code, evaluation harness and demo notebooks are in `fred/`.
 
-[![Open ICML Streamlit Demo](https://img.shields.io/badge/Live%20Demo-Streamlit‑App-FF4B4B?logo=streamlit&logoColor=white)](https://researcher3407-hallucinationdetectionediting-demoapp-xrecvm.streamlit.app/)
+<a href="https://researcher3407-hallucinationdetectionediting-demoapp-xrecvm.streamlit.app/"
+   target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Live%20Demo-Streamlit‑App-FF4B4B?logo=streamlit&logoColor=white"
+       alt="Open ICML Streamlit Demo"/>
+</a>
 
 ---
 
