@@ -1,39 +1,27 @@
-import setuptools
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
 
-setuptools.setup(
-    name="guardrail-ml",
-    version="0.0.12",
-    packages=find_packages(exclude=["tests", "guardrailmlev", "examples", "docs", "env", "dist"]),
-    author="Kevin Wu",
-    author_email="kevin@guardrailml.com",
-    description="Monitor LLMs with custom metrics to scale with confidence",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="http://www.guardrailml.com",
+def get_requirements(requirements_path):
+    with open(requirements_path, "r") as file:
+        requirements = [
+            line.strip() for line in file if line and not line.startswith("#")
+        ]
+    return requirements
+
+
+setup(
+    name="pegasi_shield_safeguards",
+    version="0.3.0",
+    packages=find_packages(),
+    install_requires=get_requirements("requirements_lock.txt"),
+    author="Pegasi",
+    author_email="placeholder@usepegasi.com",
+    description="Monitor and autocorrect LLMs responses",
+    url="https://pegasi.ai/",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    install_requires=[
-        "PyPDF2",
-        "textstat",
-        "transformers",
-        "sentencepiece",
-        "accelerate",
-        "bitsandbytes",
-        "cleantext",
-        "unidecode",
-        "pillow",
-        "jsonformer",
-        "scipy",
-        "pydantic",
-        "tenacity",
-        "colorama"
-    ],
 )
