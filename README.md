@@ -4,6 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI - Python Version](https://img.shields.io/pypi/v/llm-guard)](https://pypi.org/project/guardrail-ml)
 [![Downloads](https://static.pepy.tech/badge/guardrail-ml)](https://pepy.tech/project/guardrail-ml)
+[![ICML 2025](https://img.shields.io/badge/ICML-2025-blue)](https://icml.cc/)
 
 ![plot](./static/images/safeguards-shield.png)
 
