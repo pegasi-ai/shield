@@ -17,6 +17,16 @@
 Pegasi Shield sits between your application and any LLM (OpenAI, Claude, local models, etc.).  
 It inspects every prompt and response, blocks or edits unsafe content, and logs decisions for auditing—all with minimal latency and no data egress.
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17Dq4ClbxI-AIjpQM2MxiLeoLnmfxTqrR?usp=sharing)
+
+## 🔬 Research: FRED (new)
+
+Pegasi Shield’s hallucination module is powered by **FRED — Financial Retrieval‑Enhanced Detection & Editing**.
+The method was peer‑reviewed and accepted to the *ICML 2025 Workshop*.
+Code, evaluation harness and demo notebooks are in `fred/`.
+
+[![Open ICML Streamlit Demo](https://img.shields.io/badge/Live%20Demo-Streamlit‑App-FF4B4B?logo=streamlit&logoColor=white)](https://researcher3407-hallucinationdetectionediting-demoapp-xrecvm.streamlit.app/)
+
 ---
 
 ## 🔧 Key capabilities
@@ -70,14 +80,6 @@ Shield returns the same response object—or raises `ShieldError` if the call is
 4. **Trace** — JSON event with allow/block/edit decision and risk scores.
 
 All stages are configurable via YAML or Python.
-
----
-
-## 🔬 Research: FRED
-
-Pegasi Shield’s hallucination module is powered by **FRED — Financial Retrieval‑Enhanced Detection & Editing**.
-The method was peer‑reviewed and accepted to the *ICML 2025 Workshop*.
-Code, evaluation harness and demo notebooks are in `fred/`.
 
 ---
 
