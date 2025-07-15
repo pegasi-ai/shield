@@ -6,20 +6,102 @@
 [![Downloads](https://static.pepy.tech/badge/guardrail-ml)](https://pepy.tech/project/guardrail-ml)
 [![ICML 2025](https://img.shields.io/badge/ICML-2025-blue)](https://icml.cc/)
 
-![plot](./static/images/safeguards-shield.png)
+![plot](./static/images/pegasi_shield.png)
 
-Pegasi Shield is a developer toolkit to use LLMs safely and securely. Our Shield safeguards prompts and LLM interactions from costly risks to bring your AI app from prototype to production faster with confidence.
+*A lightweight safety and reliability layer for large‑language‑model (LLM) applications.*
 
-Our Shield wraps your AI agents and GenAI with a protective layer, safeguarding malicious inputs and filtering model outputs. Our comprehensive toolkit has 20+ out-of-the-box detectors for robust protection of your GenAI apps in workflow. 
+---
 
-## Benefits
-- 🚀 mitigate LLM reliability and safety risks 
-- 📝 customize and ensure LLM behaviors are safe and secure
-- 💸 access to model editing fine-tuned 4B models that is on par with OpenAI-o3
+## Overview
 
-## Features 
-- 🛠️ shield that safeguards against costly risks like toxicity, bias, PI
-- 🤖 reduce and measure ungrounded additions (hallucinations) with tools
-- 🛡️ multi-layered defense with heuristic detectors, LLM-based, vector DB
+Pegasi Shield sits between your application and any LLM (OpenAI, Claude, local models, etc.).  
+It inspects every prompt and response, blocks or edits unsafe content, and logs decisions for auditing—all with minimal latency and no data egress.
 
-Our research on hallucination detection and editing was peer-reviewed and accepted to ICML 2025 Workshop. Tutorials coming soon. 
+---
+
+## 🔧 Key capabilities
+
+| Area | What Shield provides |
+|------|----------------------|
+| **Prompt security** | Detects and blocks prompt injections, role hijacking, system‑override attempts. |
+| **Output sanitisation** | Removes personal data, hate speech, defamation and other policy violations. |
+| **Hallucination controls** | Scores and rewrites ungrounded text using a 4B parameter model at performance on par with oo3. |
+| **Observability** | Emits structured traces and metrics (OpenTelemetry) for dashboards and alerts. |
+| **Deployment** | Pure‑Python middleware, Docker image, or Helm chart for Kubernetes / VPC installs. |
+
+---
+
+## ⚡ Quick start
+
+*Coming July 18th
+
+```bash
+pip install pegasi-shield
+````
+
+```python
+from pegasi_shield import Shield
+from openai import OpenAI
+
+client = OpenAI()
+shield = Shield()                       # uses default policy
+
+messages = [{"role": "user", "content": "Tell me about OpenAI o3"}]
+response = shield.chat_completion(
+    lambda: client.chat.completions.create(model="gpt-4.1-mini", messages=messages)
+)
+
+print(response.choices[0].message.content)
+```
+
+*`Shield.chat_completion` accepts a callable that runs your normal LLM request.
+Shield returns the same response object—or raises `ShieldError` if the call is blocked.*
+
+---
+
+## 📚 How it works
+
+1. **Prompt firewall** — lightweight rules (regex, AST, ML) followed by an optional LLM check.
+2. **LLM request** — forwards the original or patched prompt to your provider.
+3. **Output pipeline**
+
+   * heuristics → vector similarity checks → policy LLM
+   * optional “Hallucination Lens” rewrite if factuality score is below threshold.
+4. **Trace** — JSON event with allow/block/edit decision and risk scores.
+
+All stages are configurable via YAML or Python.
+
+---
+
+## 🔬 Research: FRED
+
+Pegasi Shield’s hallucination module is powered by **FRED — Financial Retrieval‑Enhanced Detection & Editing**.
+The method was peer‑reviewed and accepted to the *ICML 2025 Workshop*.
+Code, evaluation harness and demo notebooks are in `fred/`.
+
+---
+
+## Roadmap
+
+* v0.5 launch (July 18th)
+* LiveKit Agent Tutorial
+* LangGraph Agent Tutorial
+* Fine‑grained policy language 
+* Streaming output inspection
+* JavaScript/TypeScript SDK
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. See `CONTRIBUTING.md` for details.
+
+---
+
+## License
+
+Apache 2.0
+
+```
+::contentReference[oaicite:0]{index=0}
+```
