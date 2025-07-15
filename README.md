@@ -1,27 +1,22 @@
-# 🪽 Pegasi Feather 
-[![License](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
+# 🛡️ Pegasi Shield 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI - Python Version](https://img.shields.io/pypi/v/llm-guard)](https://pypi.org/project/guardrail-ml)
+[![Downloads](https://static.pepy.tech/badge/guardrail-ml)](https://pepy.tech/project/guardrail-ml)
 
-## ✨ AI Testing Framework
+![plot](./static/images/safeguards-shield.png)
 
-Feather is a lightweight framework for statistical testing and validation of LLM outputs and behaviors. With Feather, you can implement comprehensive test suites, automated evaluations, and behavioral checks to ensure your AI applications perform reliably and align with specified requirements.
+Pegasi Shield is a developer toolkit to use LLMs safely and securely. Our Shield safeguards prompts and LLM interactions from costly risks to bring your AI app from prototype to production faster with confidence.
 
-## 🔍 Core Features
-- 📊 Statistical Testing: Comprehensive testing suite for model behavior validation
-- ✍️ Evaluations: Quantitative and qualitative metrics to measure model performance
-- 🛡️ Validations: Simple safety checks and output validation
+Our Shield wraps your AI agents and GenAI with a protective layer, safeguarding malicious inputs and filtering model outputs. Our comprehensive toolkit has 20+ out-of-the-box detectors for robust protection of your GenAI apps in workflow. Our research on hallucination detection and editing was peer-reviewed and accepted to ICML 2025 Workshop. 
 
-## ⚡ Get Started
-1. **Grab your API key here:** [app.pegasi.ai](https://app.pegasi.ai)
-2. Quickstart Evals notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WjV_cqLUN4IDwceFel73OthwSPtuSzu1?usp=sharing#scrollTo=tqij0KeyQMlJ)
-3. DeepSeek-R1 on FinQA notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1CaWTfk-D1Oahee3KjUtVnly6Fv_VkM-I?usp=sharing)
+## Benefits
+- 🚀 mitigate LLM reliability and safety risks 
+- 📝 customize and ensure LLM behaviors are safe and secure
+- 💸 access to model editing fine-tuned 4B models that is on par with OpenAI-o3
 
-## 💼 Roadmap
-- [x] Establish AI validators
-- [x] Setup out-of-the-box Judges
-- [ ] Add distribution-based testing
-- [ ] Expand statistical validation tools
-- [ ] Improve test results visualization
-- [ ] Enable custom test case creation
-- [ ] Add community-driven test suites
+## Features 
+- 🛠️ shield that safeguards against costly risks like toxicity, bias, PI
+- 🤖 reduce and measure ungrounded additions (hallucinations) with tools
+- 🛡️ multi-layered defense with heuristic detectors, LLM-based, vector DB
