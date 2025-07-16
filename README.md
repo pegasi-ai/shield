@@ -36,6 +36,12 @@ Code, evaluation harness and demo notebooks are in `fred/`.
        alt="Open ICML Streamlit Demo"/>
 </a>
 
+<a href="https://openreview.net/forum?id=oPxZ01t3fH"
+   target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Paper-OpenReview-blue"
+       alt="Read the paper on OpenReview">
+</a>
+
 ---
 
 ## 🔧 Key capabilities
