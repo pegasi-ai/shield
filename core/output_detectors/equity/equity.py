@@ -60,7 +60,7 @@ class Equity(Detector):
         # Determine if content is harmful based on threshold
         is_harmful = harmful_prob > 0.5
         
-        # Create a response in the expected JSON format
+        # Created a response in the expected JSON format
         equity_response = json.dumps({
             "harmful": is_harmful,
             "reasoning": f"Prompt Guard model detected {'harmful' if is_harmful else 'safe'} content with confidence {harmful_prob:.2f}",
