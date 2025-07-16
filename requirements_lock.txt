@@ -1,3 +1,7 @@
+hf-xet==1.1.5
+jiter==0.10.0
+setuptools==80.9.0
+typing-inspection==0.4.1
 accelerate
 absl-py==2.2.0
 annotated-types==0.7.0
@@ -17,7 +21,6 @@ curated-transformers==0.1.1
 cymem==2.0.8
 detect-secrets==1.4.0
 distro==1.9.0
-Faker==19.6.1
 faker
 fasttext==0.9.3
 fasttext-langdetect==1.0.5
@@ -48,6 +51,7 @@ keras==3.5.0
 langcodes==3.4.0
 language-tags==1.0.0
 language_data==1.2.0
+lettucedetect
 libclang==18.1.1
 lightgbm==4.4.0
 Markdown==3.7
@@ -60,7 +64,7 @@ murmurhash==1.0.10
 namex==0.0.8
 networkx==3.5
 nltk==3.6.6
-numpy==2.1.0
+numpy>=2.2.2
 onnx==1.18.0
 onnxruntime==1.22.1
 openai==1.35.13
@@ -73,7 +77,6 @@ parameterized==0.7.4
 phonenumbers==8.13.43
 pillow==10.4.0
 preshed==3.0.9
-presidio-analyzer[gliner]>=2.2.357
 presidio-analyzer
 presidio-anonymizer
 protobuf>=4.25.1
@@ -110,13 +113,8 @@ srsly==2.4.8
 stanza==1.2
 stopwordsiso==0.6.1
 sympy>=1.13.2
-tensorboard==2.19.0
-tensorboard-data-server==0.7.2
-tensorflow==2.19.0
-tensorflow-io-gcs-filesystem==0.37.1
 termcolor==2.4.0
 textstat==0.7.3
-tf_keras==2.19.0
 thinc==8.3.6
 threadpoolctl==3.5.0
 tiktoken==0.7.0

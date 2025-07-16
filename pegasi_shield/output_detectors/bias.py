@@ -1,9 +1,7 @@
 import logging
 from genbit.genbit_metrics import GenBitMetrics
-from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 from pegasi_shield.output_detectors.base_detector import Detector
 
-_model_name = "d4data/bias-detection-model"
 _language = "en"
 
 log = logging.getLogger(__name__)
@@ -11,24 +9,20 @@ log = logging.getLogger(__name__)
 
 class Bias(Detector):
     """
-    A detector to check for bias in text using GenBit and a Huggingface bias detection model.
+    A detector to check for bias in text using GenBit metrics.
     """
 
-    def __init__(self, language_code=_language, model_name=_model_name):
+    def __init__(self, language_code=_language):
         """
-        Initializes BiasDetection with GenBit, a language code, and a Huggingface model for bias detection.
+        Initializes BiasDetection with GenBit and a language code.
 
         Parameters:
             language_code (str): The language code for GenBit.
-            model_name (str): The HuggingFace model name for bias detection.
         """
         self._genbit_metrics = None  # Initialize GenBitMetrics to None
-        self._bias_detection_model = (
-            TFAutoModelForSequenceClassification.from_pretrained(model_name)
-        )
-        self._tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-        log.debug(f"Initialized HuggingFace model: {model_name}")
+        self._language_code = language_code
+        
+        log.debug(f"Initialized Bias detector with language code: {language_code}")
 
     def scan(self, prompt: str, output: str, context: str) -> (str, bool, float):
         """
@@ -48,7 +42,7 @@ class Bias(Detector):
 
         # Reinitialize GenBitMetrics for each scan to clear data
         self._genbit_metrics = GenBitMetrics(
-            _language, context_window=5, distance_weight=0.95, percentile_cutoff=80
+            self._language_code, context_window=5, distance_weight=0.95, percentile_cutoff=80
         )
 
         # Add text to GenBit for bias detection
@@ -60,19 +54,16 @@ class Bias(Detector):
         )
         log.debug(f"GenBit Bias metrics: {metrics}")
 
-        # Tokenize and prepare input for the HuggingFace model
-        # inputs = self._tokenizer(output, return_tensors="tf", padding=True, truncation=True)  # Use "tf" for TensorFlow
-        # logits = self._bias_detection_model(inputs)[0]
-        # bias_score = tf.nn.softmax(logits, axis=-1).numpy()[0]  # Assuming the model is multi-class
+        # TensorFlow model inference removed - using only GenBit metrics
 
         # Check if bias is detected based on your criteria
         # You can customize this part based on your specific bias detection requirements
         bias_detected = False
 
-        # Example: Check if bias is detected based on GenBit and HuggingFace model
+        # Check if bias is detected based on GenBit metrics
         gender_metrics_score = metrics["genbit_score"]
         # Check your specific bias detection criteria here
-        # Example: If the gender bias score is above a certain threshold and the model predicts bias, consider it as bias detected
+        # If the gender bias score is above a certain threshold, consider it as bias detected
         if gender_metrics_score > 0.5:
             bias_detected = True
 
