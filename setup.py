@@ -19,7 +19,7 @@ setup(
     package_data={
         "pegasi_shield.output_detectors.equity": ["models/*.pkl"],
     },
-    install_requires=get_requirements("requirements_lock.txt"),
+    install_requires=get_requirements("requirements.txt"),
     author="Pegasi",
     author_email="placeholder@usepegasi.com",
     description="Monitor and autocorrect LLMs responses",
