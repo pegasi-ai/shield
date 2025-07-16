@@ -5,7 +5,7 @@ from .deanonymize import Deanonymize
 from .reidentify import Reidentify
 from .equity.equity import Equity
 from .factual_consistency import FactualConsistency
-from .hallucinations import HallucinationDetector, ModernBERTGroundednessDetector
+from .hallucinations import HallucinationDetector
 from .harmful import HarmfulOutput
 from .language import LanguageOutput
 from .malware_url import MalwareOutputURL

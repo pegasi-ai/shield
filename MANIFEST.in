@@ -1,0 +1,7 @@
+include requirements.txt
+include requirements_lock.txt
+include README.md
+include CHANGELOG.md
+recursive-include pegasi_shield *.json
+recursive-include pegasi_shield *.pkl
+recursive-include pegasi_shield *.txt

@@ -1,25 +1,23 @@
 from setuptools import setup, find_packages
+import os
 
-
-def get_requirements(requirements_path):
-    with open(requirements_path, "r") as file:
-        requirements = [
-            line.strip() for line in file if line and not line.startswith("#")
-        ]
-    return requirements
-
-
+def get_requirements():
+    print("Current working directory:", os.getcwd())
+    print("Files in current directory:", os.listdir())
+    try:
+        with open('requirements.txt', 'r') as f:
+            requirements = [line.strip() for line in f.readlines() if line.strip() and not line.startswith('#')]
+        return requirements
+    except FileNotFoundError:
+        print("requirements.txt not found, returning empty list")
+        return []
 
 setup(
-
     name="pegasi_shield",
     version="0.0.26",
     packages=find_packages(),
-    include_package_data=True,
-    package_data={
-        "pegasi_shield.output_detectors.equity": ["models/*.pkl"],
-    },
-    install_requires=get_requirements("requirements.txt"),
+    package_data={'': ['requirements.txt']},
+    install_requires=get_requirements(),
     author="Pegasi",
     author_email="placeholder@usepegasi.com",
     description="Monitor and autocorrect LLMs responses",
