@@ -30,7 +30,7 @@ Pegasi Shield’s hallucination module is powered by **FRED — Financial Retri
 The method was peer‑reviewed and accepted to the *ICML 2025 Workshop*.
 Code, evaluation harness and demo notebooks are in `fred/`.
 
-<a href="https://researcher3407-hallucinationdetectionediting-demoapp-xrecvm.streamlit.app/"
+<a href="https://pegasi-fred-demo-v1.streamlit.app/"
    target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Live%20Demo-Streamlit‑App-FF4B4B?logo=streamlit&logoColor=white"
        alt="Open ICML Streamlit Demo"/>
