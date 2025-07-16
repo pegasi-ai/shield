@@ -14,7 +14,7 @@ def get_requirements():
 
 setup(
     name="pegasi_shield",
-    version="0.0.26",
+    version="0.0.27",
     packages=find_packages(),
     package_data={'': ['requirements.txt']},
     install_requires=get_requirements(),
