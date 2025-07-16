@@ -7,9 +7,9 @@ from transformers import (
     TextClassificationPipeline,
 )
 
-from pegasi_shield_safeguards.utils import device
+from pegasi_shield.utils import device
 
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 model_name = "huggingface/CodeBERTa-language-id"

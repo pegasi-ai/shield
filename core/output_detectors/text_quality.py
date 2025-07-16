@@ -1,5 +1,5 @@
 import logging
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.output_detectors.base_detector import Detector
 from textstat import textstat
 
 log = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.settings import transient_settings
 from presidio_anonymizer.core.text_replace_builder import TextReplaceBuilder
 
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector
+from pegasi_shield.input_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 

@@ -236,4 +236,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+
+#extra
+shield_tests/
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,python,virtualenv,visualstudiocode

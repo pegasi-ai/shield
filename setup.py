@@ -9,10 +9,16 @@ def get_requirements(requirements_path):
     return requirements
 
 
+
 setup(
-    name="pegasi_shield_safeguards",
-    version="0.3.0",
+
+    name="pegasi_shield",
+    version="0.0.25",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "pegasi_shield.output_detectors.equity": ["models/*.pkl"],
+    },
     install_requires=get_requirements("requirements_lock.txt"),
     author="Pegasi",
     author_email="placeholder@usepegasi.com",

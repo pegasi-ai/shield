@@ -3,14 +3,14 @@ import concurrent.futures
 import spacy.cli
 from typing import Dict, List, Tuple
 
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector as InputDetector
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector as OutputDetector
+from pegasi_shield.input_detectors.base_detector import Detector as InputDetector
+from pegasi_shield.output_detectors.base_detector import Detector as OutputDetector
 
-from pegasi_shield_safeguards.vault import Vault
-from pegasi_shield_safeguards.input_detectors import Anonymize, Secrets, PromptInjections, DoSTokens, StopInputSubstrings, MalwareInputURL, HarmfulInput, TextQualityInput
-from pegasi_shield_safeguards.output_detectors import Deanonymize, SensitivePII, StopOutputSubstrings, HallucinationDetector, FactualConsistency, MalwareOutputURL, HarmfulOutput, TextQualityOutput, Bias, PromptOutputRelevance, OutputContextRelevance, PromptContextRelevance, Contradictions
+from pegasi_shield.vault import Vault
+from pegasi_shield.input_detectors import Anonymize, Secrets, PromptInjections, DoSTokens, StopInputSubstrings, MalwareInputURL, HarmfulInput, TextQualityInput
+from pegasi_shield.output_detectors import Deanonymize, SensitivePII, StopOutputSubstrings, HallucinationDetector, FactualConsistency, MalwareOutputURL, HarmfulOutput, TextQualityOutput, Bias, PromptOutputRelevance, OutputContextRelevance, PromptContextRelevance, Contradictions
 
-# from pegasi_shield_safeguards.base_tracker import GuardrailBaseTracker
+# from pegasi_shield.base_tracker import GuardrailBaseTracker
 import spacy.cli
 from spacy.cli import download
 

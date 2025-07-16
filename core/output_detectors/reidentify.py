@@ -4,8 +4,8 @@ import os
 import re
 from typing import Tuple, List, Optional, Pattern, Dict
 
-from pegasi_shield_safeguards.vault import Vault
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.vault import Vault
+from pegasi_shield.output_detectors.base_detector import Detector
 
 SENSITIVE_PATTERNS_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),

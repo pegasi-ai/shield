@@ -17,9 +17,9 @@ from presidio_anonymizer.entities import PIIEntity, RecognizerResult
 from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
 from presidio_anonymizer import AnonymizerEngine
 
-from pegasi_shield_safeguards.vault import Vault
+from pegasi_shield.vault import Vault
 
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector
+from pegasi_shield.input_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 fake = Faker(seed=100)

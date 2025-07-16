@@ -4,8 +4,8 @@ from transformers import (
     AutoTokenizer,
     TextClassificationPipeline,
 )
-from pegasi_shield_safeguards.utils import device
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector
+from pegasi_shield.utils import device
+from pegasi_shield.input_detectors.base_detector import Detector
 
 _model_path_2 = "hubert233/GPTFuzz"
 log = logging.getLogger(__name__)

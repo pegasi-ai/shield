@@ -1,9 +1,9 @@
 import logging
 
 from googleapiclient import discovery
-from pegasi_shield_safeguards.keys import load_api_key, init_perspective_key
+from pegasi_shield.keys import load_api_key, init_perspective_key
 
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 

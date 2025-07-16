@@ -1,7 +1,7 @@
 import logging
 from genbit.genbit_metrics import GenBitMetrics
 from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.output_detectors.base_detector import Detector
 
 _model_name = "d4data/bias-detection-model"
 _language = "en"

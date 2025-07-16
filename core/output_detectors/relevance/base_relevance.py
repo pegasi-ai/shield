@@ -1,7 +1,7 @@
 import logging
 from sentence_transformers import SentenceTransformer, util
 from transformers import pipeline, AutoModelForTokenClassification, AutoTokenizer
-from pegasi_shield_safeguards.utils import device
+from pegasi_shield.utils import device
 import torch
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor, as_completed

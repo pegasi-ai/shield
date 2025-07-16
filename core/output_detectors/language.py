@@ -1,8 +1,8 @@
 import logging
 from typing import List
 
-from pegasi_shield_safeguards.input_detectors.language import LanguageInput
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.input_detectors.language import LanguageInput
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 
