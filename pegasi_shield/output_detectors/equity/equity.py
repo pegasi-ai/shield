@@ -1,87 +1,99 @@
 import asyncio
 import json
 import logging
+import os
 import re
 import time
-import numpy as np
 
-from transformers import AutoTokenizer
-from optimum.onnxruntime import ORTModelForSequenceClassification
+from groq import Groq
 from pegasi_shield.output_detectors.base_detector import Detector
-
 
 log = logging.getLogger(__name__)
 
-
 class Equity(Detector):
     """
-    A detector to detect and prevent toxic outputs using Prompt Guard model.
+    A detector to detect and prevent toxic outputs using Meta-Llama via Groq API.
     """
 
     def __init__(self):
         """
         Initializes the EquityDetector
         """
-        self.model_name = "gravitee-io/Llama-Prompt-Guard-2-22M-onnx"
-        self.model = ORTModelForSequenceClassification.from_pretrained(
-            self.model_name, 
-            file_name="model.quant.onnx"
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.llm_model = "meta-llama/llama-guard-4-12b"
+        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        
+        if not os.getenv("GROQ_API_KEY"):
+            raise ValueError("GROQ_API_KEY not found in environment variables.")
 
     async def create_chat_completion(self, messages, **kwargs):
-        """
-        Process the prompt through Prompt Guard model to detect harmful content
-        """
-        # Extract the content from messages
-        content = messages[0]["content"] if messages else ""
-        
+        kwargs["model"] = self.llm_model
+        kwargs["messages"] = messages
+        kwargs["temperature"] = 0.3
+
         start_time = time.time()
-        
-        # Tokenize input
-        inputs = self.tokenizer(
-            content, 
-            return_tensors="pt", 
-            padding=True, 
-            truncation=True,
-            max_length=512
-        )
-        
-        # Run inference
-        outputs = self.model(**inputs)
-        logits = outputs.logits
-        
-        # Convert to probabilities using softmax
-        probs = np.exp(logits.numpy()) / np.sum(np.exp(logits.numpy()), axis=1, keepdims=True)
-        
-        # Get the harmful probability (assuming class 1 is harmful)
-        harmful_prob = float(probs[0][1]) if probs.shape[1] > 1 else 0.0
-        
-        # Determine if content is harmful based on threshold
-        is_harmful = harmful_prob > 0.5
-        
-        # Created a response in the expected JSON format
-        equity_response = json.dumps({
-            "harmful": is_harmful,
-            "reasoning": f"Prompt Guard model detected {'harmful' if is_harmful else 'safe'} content with confidence {harmful_prob:.2f}",
-            "confidence": harmful_prob
-        })
-        
+        groq_response = await self._chat_completion_request(**kwargs)
+        equity_response = groq_response.choices[0].message.content
+
         end_time = time.time()
         total_time = end_time - start_time
-        log.info(f"Prompt Guard equity detector executed in {total_time:.4f} seconds")
-        
+        log.info(f"LLM equity detector executed in {total_time:.4f} seconds")
+
         return equity_response
+
+    async def _chat_completion_request(self, **kwargs):
+        return self.client.chat.completions.create(**kwargs)
 
     async def analyze_equity(self, text: str) -> str:
         """
-        Analyzes the equity of a given text using the ONNX model directly
+        Analyzes the equity of a given text using Meta-Llama via Groq API
         """
-        # Create a message format for the model
+        prompt_template = """
+        You are an assistant specializing in identifying harmful and non-compliant content. Assess the given response for potential toxicity, bias, or non-compliant responses in the context of health insurance and financial institutions. Specifically, examine the response for the presence of:
+
+        Toxicity
+        Stereotypes
+        Threats
+        Non-compliance (e.g. Equal Credit Opportunity Act (ECOA), Genetic Information Nondiscrimination Act (GINA), Americans with Disabilities Act (ADA), FERPA etc.)
+        Misleading about rights under the Americans with Disabilities Act (ADA) and other laws
+        Obscenities
+        Harmful speech
+        Gender bias
+        Subtle victim blaming
+        Unintentional bias regarding employment
+        Implying limited worth based on health status
+        Overly simplistic solutions
+        Age discrimination
+        Socioeconomic bias
+        Cultural insensitivity
+        Discrimination based on disability
+        Racial bias
+        Disparagement based on education level
+        Insensitive Language Towards Non-Binary Individuals
+
+        Inputs:
+        1. Prompt: to provide context
+        2. Response: the text to evaluate
+
+        Respond with the following JSON for the response ONLY:
+        
+        {
+        "harmful": "...",
+        "reasoning": "...",
+        "confidence": "..."
+        }
+
+        - "harmful" is a boolean value (true or false)
+        - "reasoning" provides a detailed explanation for the decision regarding toxicity or bias
+        - "confidence" is a score ranging from 0 to 1.0
+
+        Let's think step by step. Ensure that your final output is strictly in JSON format, with no additional text or explanation outside the JSON structure.
+        """
+
+        final_prompt = prompt_template + " " + text
         messages = [
             {
                 "role": "user",
-                "content": text,
+                "content": final_prompt,
             }
         ]
         response = await self.create_chat_completion(messages)
@@ -89,7 +101,7 @@ class Equity(Detector):
 
     def scan(self, prompt: str, response: str, context: str) -> (str, bool, float):
         """
-        Scan the prompt and response for harmful content using only the ONNX model
+        Scan the prompt and response for harmful content using Meta-Llama via Groq API
         """
         if response.strip() == "" or prompt.strip() == "":
             return json.dumps({
@@ -101,8 +113,14 @@ class Equity(Detector):
         # Combine prompt and response for analysis
         input_text = f"prompt: {prompt}\nresponse: {response}"
         
-        # Run the ONNX model analysis
+        # Run the equity analysis
         equity_response = asyncio.run(self.analyze_equity(input_text))
+        
+        # Clean JSON
+        equity_response = equity_response.strip()
+        equity_response = equity_response.replace("'", '"')
+        equity_response = re.sub(r"\\n", "", equity_response)
+        equity_response = re.sub(r"\s+", " ", equity_response)
         
         # Parse the JSON response
         try:
