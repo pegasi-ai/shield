@@ -7,8 +7,8 @@ from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.predefined_recognizers import GLiNERRecognizer
 from presidio_anonymizer import AnonymizerEngine
 
-from pegasi_shield_safeguards.vault import Vault
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector
+from pegasi_shield.vault import Vault
+from pegasi_shield.input_detectors.base_detector import Detector
 
 # Configure logging
 log = logging.getLogger(__name__)

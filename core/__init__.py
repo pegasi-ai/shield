@@ -1,1 +1,1 @@
-from pegasi_shield_safeguards.shield import Shield
+from pegasi_shield.shield import Shield

@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil import parser
 import re
 
-from pegasi_shield_safeguards.utils import device
+from pegasi_shield.utils import device
 
 from .base_detector import Detector
 

@@ -5,13 +5,13 @@ from typing import List, Optional
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import SpacyNlpEngine
 
-from pegasi_shield_safeguards.input_detectors.anonymize import (
+from pegasi_shield.input_detectors.anonymize import (
     Anonymize,
     DEFAULT_ENTITY_TYPES,
     SENSITIVE_PATTERNS_PATH,
 )
 
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 

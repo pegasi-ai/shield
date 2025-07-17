@@ -1,6 +1,6 @@
 import logging
-from pegasi_shield_safeguards.vault import Vault
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.vault import Vault
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 

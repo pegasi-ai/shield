@@ -10,7 +10,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from transformers import logging as transformers_logging
 
 from .base_detector import Detector
-from pegasi_shield_safeguards.utils import device
+from pegasi_shield.utils import device
 
 nltk.download("punkt")
 nltk.download("averaged_perceptron_tagger")

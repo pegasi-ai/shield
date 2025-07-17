@@ -1,7 +1,7 @@
 import openai
 import logging
-from pegasi_shield_safeguards.keys import load_api_key
-from pegasi_shield_safeguards.input_detectors.base_detector import Detector
+from pegasi_shield.keys import load_api_key
+from pegasi_shield.input_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 

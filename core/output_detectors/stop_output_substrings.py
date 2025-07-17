@@ -4,8 +4,8 @@ import re
 import json
 from typing import List, Optional
 
-from pegasi_shield_safeguards.input_detectors.stop_input_substrings import allowed_match_type
-from pegasi_shield_safeguards.output_detectors.base_detector import Detector
+from pegasi_shield.input_detectors.stop_input_substrings import allowed_match_type
+from pegasi_shield.output_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
 stop_file_path = os.path.join(
