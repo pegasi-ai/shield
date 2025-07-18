@@ -1,5 +1,6 @@
 import logging
 from genbit.genbit_metrics import GenBitMetrics
+from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 from pegasi_shield.output_detectors.base_detector import Detector
 
 _language = "en"
