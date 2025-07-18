@@ -1,0 +1,1 @@
+from pegasi_shield.shield import Shield
