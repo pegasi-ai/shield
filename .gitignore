@@ -240,5 +240,6 @@ $RECYCLE.BIN/
 #extra
 shield_tests/
 .claude
+equity-copy.py
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,python,virtualenv,visualstudiocode
