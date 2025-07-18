@@ -58,7 +58,7 @@ Code, evaluation harness and demo notebooks are in `fred/`.
 
 ## ⚡ Quick start
 
-*Coming July 18th
+*Coming July 25th
 
 ```bash
 pip install pegasi-shield
