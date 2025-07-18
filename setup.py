@@ -13,7 +13,7 @@ def get_requirements(requirements_path):
 setup(
 
     name="pegasi_shield",
-    version="0.0.25",
+    version="0.0.26",
     packages=find_packages(),
     include_package_data=True,
     package_data={

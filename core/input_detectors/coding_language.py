@@ -12,7 +12,7 @@ from pegasi_shield.utils import device
 from pegasi_shield.input_detectors.base_detector import Detector
 
 log = logging.getLogger(__name__)
-model_name = "huggingface/CodeBERTa-language-id"
+model_name = "1"
 
 
 class LanguageDetection(Detector):
