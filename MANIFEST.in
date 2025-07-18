@@ -1,0 +1,7 @@
+include requirements.txt
+include requirements_lock.txt
+include README.md
+include CHANGELOG.md
+recursive-include core *.json
+recursive-include core *.pkl
+recursive-include core *.txt

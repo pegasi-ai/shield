@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name            = "pegasi-shield"
+version         = "0.0.30"
+description     = "Monitor and autocorrect LLM responses with Pegasi Shield"
+readme          = "README.md"
+requires-python = ">=3.8"
+license         = {text = "AGPL-3.0-or-later"}
+authors = [{name = "Pegasi AI", email = "oss@pegasi.ai"}]
+classifiers = [
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = [
+  "openai>=1.13",
+  "requests>=2.32",
+  "pydantic>=2.7",
+  "tqdm>=4.0",
+  "tiktoken>=0.5.0",
+  "numpy>=1.21.0",
+  "sentence-transformers>=2.2.0",
+  "torch>=1.9.0",
+  "transformers>=4.20.0",
+  "spacy>=3.7",
+  "python-dotenv>=0.19.0",
+  "fasttext-langdetect>=1.0.0",
+  "detect-secrets>=1.0.0",
+  "textstat>=0.7.0",
+  "google-api-python-client>=2.0.0",
+  "optimum[onnxruntime]>=1.0.0",
+  "genbit>=2.0.0"
+]
+
+[project.optional-dependencies]
+llama = ["transformers>=4.42.0", "accelerate>=0.28.0", "safetensors>=0.4.2"]
+
+[project.urls]
+Homepage = "https://github.com/pegasi-ai/shield"
+Source   = "https://github.com/pegasi-ai/shield"
+Issues   = "https://github.com/pegasi-ai/shield/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pegasi_shield"]
