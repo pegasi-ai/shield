@@ -1,9 +1,9 @@
-./withsafeguardsenv
-*./withsafeguardsenv
-*./withsafeguardsenv/share
+./guardrailmlenv
+*./guardrailmlenv
+*./guardrailmlenv/share
 logs.db 
 .logs.db
-.examples/milvus_rag.db
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,python,virtualenv,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,python,virtualenv,visualstudiocode
 
@@ -15,6 +15,7 @@ __pycache__/
 
 # C extensions
 *.so
+
 # Distribution / packaging
 .Python
 build/
@@ -136,7 +137,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-env_safeguards/
 
 # Spyder project settings
 .spyderproject
@@ -236,4 +236,10 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+
+#extra
+shield_tests/
+vnv/
+dist/
+.claude
 # End of https://www.toptal.com/developers/gitignore/api/windows,python,virtualenv,visualstudiocode
