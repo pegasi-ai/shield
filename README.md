@@ -40,10 +40,9 @@ Code, evaluation harness and demo notebooks are in `fred/`.
 
 <a href="https://arxiv.org/abs/2507.20930"
    target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Paper-OpenReview-blue"
-       alt="Read the paper on OpenReview">
+  <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b"
+       alt="Read the paper on arXiv">
 </a>
-
 ---
 
 ## 🔧 Key capabilities
