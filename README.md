@@ -51,7 +51,7 @@ Code, evaluation harness and demo notebooks are in `fred/`.
 |------|----------------------|
 | **Prompt security** | Detects and blocks prompt injections, role hijacking, system‑override attempts. |
 | **Output sanitisation** | Removes personal data, hate speech, defamation and other policy violations. |
-| **Hallucination controls** | Scores and rewrites ungrounded text using a 4B parameter model at performance on par with oo3. |
+| **Hallucination controls** | Scores and rewrites ungrounded text using a 4B parameter model at performance on par with o3. |
 | **Observability** | Emits structured traces and metrics (OpenTelemetry) for dashboards and alerts. |
 | **Deployment** | Pure‑Python middleware, Docker image, or Helm chart for Kubernetes / VPC installs. |
 
