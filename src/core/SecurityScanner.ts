@@ -110,7 +110,12 @@ const REMEDIATIONS = {
   nodeVersion: 'Upgrade Node.js to a version not affected by CVE-2026-21636',
   controlUiAuth: 'Disable auth bypass flags and require authentication for the Control UI',
   browser: 'Set headless: true in your browser skill config to reduce DOM prompt-injection risk',
+  clawHavoc: 'Remove the affected skill and rotate any credentials it may have had access to',
 } as const;
+
+const CLAWHAVOC_C2_PATTERN = /(?<![\w-])(socifiapp\.com|rentry\.co|glot\.io|91\.92\.242\.30|95\.92\.242\.30|96\.92\.242\.30|202\.161\.50\.59|54\.91\.154\.110)(?![\w-]|\.\w)/i;
+const CLAWHAVOC_CREDENTIAL_TARGET_PATTERN = /\.clawdbot[\\/]\.env/i;
+const CLAWHAVOC_OBFUSCATION_PATTERN = /(base64\s+-d|atob\(|Buffer\.from\([^)]*['"]base64['"]\))[\s\S]{0,120}(curl|wget|sh -c|bash -c|python)/i;
 
 const KEY_VALUE_PATTERNS = (key: string): RegExp[] => [
   new RegExp(`"${escapeRegex(key)}"\\s*:\\s*"([^"]+)"`, 'i'),
@@ -235,6 +240,7 @@ export class SecurityScanner {
       await this.checkNodeVersion(context),
       await this.checkControlUiAuth(context),
       await this.checkBrowserUnsandboxed(context),
+      await this.checkClawHavocIndicators(),
     ];
   }
 
@@ -629,6 +635,58 @@ export class SecurityScanner {
     }
 
     return this.fail('BROWSER_UNSANDBOXED', 'browser is not sandboxed', REMEDIATIONS.browser);
+  }
+
+  private async findInstalledSkillFiles(): Promise<ConfigSnapshot[] | null> {
+    const skillsRoot = path.join(this.openclawHome, 'skills');
+    if (!(await fs.pathExists(skillsRoot))) {
+      return [];
+    }
+
+    // The root can disappear or lose its read bit between the check and the read.
+    const entries = await fs.readdir(skillsRoot, { withFileTypes: true }).catch(() => null);
+    if (entries === null) {
+      return null;
+    }
+
+    const files: ConfigSnapshot[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+      files.push(await this.readConfig(path.join(skillsRoot, entry.name, 'SKILL.md')));
+    }
+    return files;
+  }
+
+  private async checkClawHavocIndicators(): Promise<ScanCheck> {
+    const skillFiles = await this.findInstalledSkillFiles();
+    if (skillFiles === null) {
+      return this.warn(
+        'CLAWHAVOC_IOC',
+        'installed skills could not be read, so ClawHavoc indicators were not checked',
+        'Make ~/.openclaw/skills readable by the current user and run the scan again'
+      );
+    }
+
+    const affected = skillFiles.find(
+      (file) =>
+        file.exists &&
+        file.raw &&
+        (CLAWHAVOC_C2_PATTERN.test(file.raw) ||
+          CLAWHAVOC_CREDENTIAL_TARGET_PATTERN.test(file.raw) ||
+          CLAWHAVOC_OBFUSCATION_PATTERN.test(file.raw))
+    );
+
+    if (affected) {
+      return this.fail(
+        'CLAWHAVOC_IOC',
+        `installed skill matches a ClawHavoc indicator of compromise (${affected.path.replace(this.userHome, '~')})`,
+        REMEDIATIONS.clawHavoc
+      );
+    }
+
+    return this.pass('CLAWHAVOC_IOC', 'no installed skills match known ClawHavoc indicators');
   }
 
   private computeFixActions(context: ScanContext): FixAction[] {
