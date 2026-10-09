@@ -18,7 +18,7 @@
 
 > In Greek myth, Athena gave Bellerophon the golden bridle — reins included — that let him guide Pegasus. Reins applies the same idea to AI agents: raw power is not enough — what matters is making it controllable.
 
-Reins enforces deterministic security policies on every agent action, scans your configs for OWASP ASI10 vulnerabilities, and tracks drift over time. Policies evaluate in under 50ms. Works with Claude Code PreToolUse and PostToolUse hooks, OpenClaw, and any MCP-compatible agent.
+Reins checks agent tool calls against configurable security policies, scans agent configs, and tracks configuration drift. Integrations include Claude Code hooks and OpenClaw. Custom tool adapters can call the policy engine directly.
 
 ## Quickstart
 
@@ -26,6 +26,25 @@ Reins enforces deterministic security policies on every agent action, scans your
 npm install -g @pegasi-ai/reins
 reins init
 ```
+
+### Try a policy check without an agent or API key
+
+From a clone of this repository, using Node.js 22.12 or newer:
+
+```bash
+npm ci --ignore-scripts
+npm run demo:karotte:policy
+```
+
+Watch Reins deny an outside recipient, allow the authorized team, and verify the saved simulated delivery. To run the same scenario through a real RL environment, install uv, start Docker, and run `npm run demo:karotte`.
+
+### Reins + Karotte
+
+Reins controls a scoped publishing tool; [Karotte](https://github.com/preferencemodel/karotte) runs the task and grades its protected delivery record. The keyless replay verifies both an enforced denial and authorized completion.
+
+![Reins and Karotte scripted regression](./public/reins-karotte-demo.gif)
+
+This GIF presents a recorded scripted regression. Delivery is simulated; no real email is sent. See the [quickstart, implementation, and boundaries](./examples/karotte/README.md).
 
 ## Claude Code Skill
 
@@ -49,15 +68,13 @@ An OpenClaw agent tries to bulk-delete 4,382 Gmail messages. Reins blocks it bef
 
 - **Prevent** — Block destructive actions before execution. Score irreversibility. Detect risky browser state.
 - **Pause** — Route high-impact actions through terminal or messaging approval flows. Require explicit `CONFIRM-*` tokens for catastrophic operations.
-- **Prove** — Preserve an immutable audit trail of every decision, approval, and block.
+- **Record** - Keep local decision records for inspection and debugging.
 
-## Security guarantees
+## Security scope
 
-- **Zero Trust** — every action evaluated before execution
-- **Synchronous** — agent cannot proceed until the hook exits
-- **No network in the hot path** — policies cached locally, enforced offline
-- **Fail-closed** — any unhandled hook error blocks the action
-- **Immutable audit** — append-only JSONL at `~/.openclaw/reins/decisions.jsonl`
+Controls apply to actions routed through a configured integration. Review each adapter's error handling, tool coverage, policy defaults, and approval behavior before relying on it. An alternate tool or unrestricted shell can bypass a scoped adapter.
+
+Local JSONL records are editable by users with filesystem access. Logging alone does not prove execution or evidence completeness. The Karotte example separately records policy decisions and simulated deliveries in protected task state, then checks both during grading.
 
 ## Documentation
 
