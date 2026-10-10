@@ -61,6 +61,11 @@ class PublishReportTests(unittest.TestCase):
         )
         self.assertEqual(DeliveryJudge().evaluate(Transcript(run_id="test")).score, 0)
 
+    def test_scripted_regression_still_requires_its_exact_two_call_sequence(self) -> None:
+        with patch.object(tool, "check_policy", return_value=("ALLOW", "Allowed")):
+            tool.publish_report("team@example.test")
+        self.assertEqual(DeliveryJudge().evaluate(Transcript(run_id="test")).score, 0)
+
     def test_grader_rejects_extra_delivery(self) -> None:
         self.test_policy_denial_has_no_delivery_and_allow_has_one()
         deliveries = read_state("deliveries")
