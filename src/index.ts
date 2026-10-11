@@ -5,7 +5,13 @@
 // Core Components
 export { Interceptor } from './core/Interceptor';
 export { Arbitrator } from './core/Arbitrator';
-export { approvalQueue } from './core/ApprovalQueue';
+export { approvalQueue, ApprovalQueue } from './core/ApprovalQueue';
+export type {
+  ApprovalHandle,
+  ApprovalRequestContext,
+  ApprovalNotification,
+  ApprovalRequestOptions,
+} from './core/ApprovalQueue';
 export { logger, LOG_PATH, REINS_DATA_DIR, CLAWREINS_DATA_DIR } from './core/Logger';
 
 // Storage

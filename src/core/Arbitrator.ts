@@ -4,7 +4,7 @@
  *
  * Modes:
  *  1. TTY (interactive terminal)      → inquirer prompt
- *  2. Daemon + sessionKey (channel)   → approval queue (block-and-retry via messaging)
+ *  2. Daemon + sessionKey (channel)   → owned invocation approval (wait under a fixed deadline)
  *  3. Daemon without sessionKey       → auto-deny (fail-secure)
  */
 
@@ -13,10 +13,13 @@ import chalk from 'chalk';
 import crypto from 'crypto';
 import { ExecutionContext } from '../types';
 import { logger } from './Logger';
-import { approvalQueue } from './ApprovalQueue';
+import { approvalQueue, ApprovalQueue } from './ApprovalQueue';
+import { bindApprovalArguments } from './ApprovalBinding';
 import { DecisionLog } from '../storage/DecisionLog';
 
 export class Arbitrator {
+  constructor(private readonly queue: ApprovalQueue = approvalQueue) {}
+
   async judge(context: ExecutionContext): Promise<boolean> {
     if (process.stdin.isTTY) {
       return this.judgeTTY(context);
@@ -75,7 +78,8 @@ export class Arbitrator {
 
   private async judgeTTYExplicitConfirmation(context: ExecutionContext): Promise<boolean> {
     const token = context.intervention?.confirmationToken || 'CONFIRM';
-    const summary = context.intervention?.actionSummary || `${context.moduleName}.${context.methodName}()`;
+    const summary =
+      context.intervention?.actionSummary || `${context.moduleName}.${context.methodName}()`;
 
     console.log(chalk.bold.yellow('🔐 Irreversible action requires explicit confirmation.'));
     console.log(chalk.bold.cyan('Action Summary:'), chalk.white(summary));
@@ -90,7 +94,10 @@ export class Arbitrator {
       },
     ]);
 
-    const approved = String(answer.typed || '').trim().toUpperCase() === token.toUpperCase();
+    const approved =
+      String(answer.typed || '')
+        .trim()
+        .toUpperCase() === token.toUpperCase();
 
     console.log('');
     if (approved) {
@@ -106,63 +113,33 @@ export class Arbitrator {
 
   private async judgeChannel(context: ExecutionContext): Promise<boolean> {
     const { sessionKey, moduleName, methodName } = context;
-    const strict = context.intervention?.requiresExplicitConfirmation === true;
-
-    if (approvalQueue.consume(sessionKey!, moduleName, methodName)) {
-      logger.info(`ASK policy → approved via channel: ${moduleName}.${methodName}()`, {
-        sessionKey,
-      });
-      return true;
+    let canonical: string;
+    try {
+      canonical = bindApprovalArguments(context.args).canonical;
+    } catch {
+      return false;
     }
-
-    // Always assign a token so the OOB notifier can reference it in the /approve message.
-    const token =
-      context.intervention?.confirmationToken || this.generateChannelToken(moduleName, methodName);
-
-    approvalQueue.request(sessionKey!, moduleName, methodName, {
-      requiresExplicitConfirmation: strict,
+    const request = this.queue.request(sessionKey!, moduleName, methodName, {
+      binding:
+        context.approvalBinding || crypto.createHash('sha256').update(canonical).digest('hex'),
+      requiresExplicitConfirmation: context.intervention?.requiresExplicitConfirmation === true,
       actionSummary: context.intervention?.actionSummary,
-      confirmationToken: token,
-      allowRetryAsApproval: false,
     });
-
-    // Fire OOB notification immediately (sends WhatsApp/Telegram message to human).
-    // If onBlockCallback is absent, or it returns false (no channel context / send failure),
-    // auto-deny immediately rather than stalling for the full TTL.
-    if (!context.onBlockCallback) {
-      approvalQueue.resolveByToken(token, 'deny');
-      logger.info(
-        `ASK policy → auto-denied (no onBlockCallback configured): ${moduleName}.${methodName}()`,
-        { sessionKey }
+    if (!request) return false;
+    try {
+      if (!context.onBlockCallback) return false;
+      const notified = await this.queue.notify(request.handle, () =>
+        context.onBlockCallback!(sessionKey!, moduleName, methodName, request)
       );
+      if (!notified) return false;
+      const approved = await this.queue.waitForApproval(request.handle);
+      // evaluate() also rechecks the caller's original arguments and current policy.
+      return approved && bindApprovalArguments(context.args).canonical === canonical;
+    } catch {
       return false;
+    } finally {
+      this.queue.cancel(request.handle);
     }
-
-    const notified = await context.onBlockCallback(sessionKey!, moduleName, methodName);
-    if (!notified) {
-      // Clean up the queued entry — no one can approve it.
-      approvalQueue.resolveByToken(token, 'deny');
-      logger.info(
-        `ASK policy → auto-denied (no channel context for OOB notification): ${moduleName}.${methodName}()`,
-        { sessionKey }
-      );
-      return false;
-    }
-
-    logger.info(`ASK policy → stalling hook until OOB approval: ${moduleName}.${methodName}()`, {
-      sessionKey,
-      token,
-      requiresExplicitConfirmation: strict,
-    });
-
-    // Hold the before_tool_call hook open — OpenClaw awaits this Promise.
-    // Resolves true when the human sends /approve <token>, false on deny/timeout.
-    return approvalQueue.waitForApproval(sessionKey!, moduleName, methodName);
-  }
-
-  private generateChannelToken(moduleName: string, methodName: string): string {
-    const seed = `${moduleName}.${methodName}:${Date.now()}:${Math.random()}`;
-    return `CONFIRM-${crypto.createHash('sha1').update(seed).digest('hex').slice(0, 6).toUpperCase()}`;
   }
 
   private displayBanner(): void {

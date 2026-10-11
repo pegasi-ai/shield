@@ -1,3 +1,5 @@
+import type { ApprovalRequestContext } from './core/ApprovalQueue';
+
 /**
  * Reins type definitions.
  */
@@ -56,8 +58,8 @@ export interface InterventionMetadata {
   /** Human-readable summary of the action that needs explicit confirmation. */
   actionSummary?: string;
   /**
-   * Confirmation token shown to the user/agent. If omitted, one is generated
-   * per request.
+   * Confirmation token for TTY prompts. Channel mode ignores this value and
+   * generates a fresh token internally for each invocation.
    */
   confirmationToken?: string;
   /**
@@ -93,5 +95,15 @@ export interface ExecutionContext {
   /** Called once when a tool is blocked to fire the OOB approval notification.
    *  Returns true if a notification was actually dispatched (channel context found),
    *  false if no channel is available (e.g. TUI sessions). */
-  onBlockCallback?: (sessionKey: string, moduleName: string, methodName: string) => Promise<boolean>;
+  onBlockCallback?: ApprovalCallback;
+  /** Trusted invocation binding supplied by Interceptor for channel approval. */
+  approvalBinding?: string;
 }
+
+/** The fourth argument identifies the exact invocation for a trusted notifier. */
+export type ApprovalCallback = (
+  sessionKey: string,
+  moduleName: string,
+  methodName: string,
+  request: ApprovalRequestContext
+) => Promise<boolean>;

@@ -8,7 +8,7 @@
  * Supported channels: whatsapp, telegram (extensible).
  */
 
-import { approvalQueue } from '../core/ApprovalQueue';
+import { approvalQueue, ApprovalRequestContext } from '../core/ApprovalQueue';
 import { channelContextStore } from './ChannelContextStore';
 import { logger } from '../core/Logger';
 
@@ -54,15 +54,16 @@ export function initNotifier(runtime: OobRuntime | undefined, config: unknown, f
 // ---------------------------------------------------------------------------
 
 /**
- * Fire-and-forget: look up the pending entry, build a notification message,
- * and dispatch it to the human's channel.
+ * Look up this exact invocation, build its summary notification, and dispatch it.
+ * Arbitrator bounds the awaited callback by the original approval deadline.
  */
 export async function sendApprovalNotification(
   sessionKey: string,
   moduleName: string,
-  methodName: string
+  methodName: string,
+  request: ApprovalRequestContext
 ): Promise<boolean> {
-  const info = approvalQueue.getNotificationInfo(sessionKey, moduleName, methodName);
+  const info = approvalQueue.getNotificationInfo(request?.handle);
   if (!info) {
     logger.warn('[oob-notifier] No pending entry / token found', {
       sessionKey,
@@ -103,11 +104,6 @@ export async function sendApprovalNotification(
   return dispatch(target.channelId, target.from, target.accountId, message);
 }
 
-/**
- * Send a follow-up message to the agent's session so it retries the approved action.
- * Since selfChatMode=true, a message sent to the user's own number arrives as an
- * inbound user message that the agent sees and will act on.
- */
 // ---------------------------------------------------------------------------
 // Internal dispatcher
 // ---------------------------------------------------------------------------

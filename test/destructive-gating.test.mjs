@@ -58,11 +58,12 @@ test('HIGH destructive action executes after OOB !approve', async () => {
   // Token must NOT appear in blockReason — the agent cannot see it.
   assert.doesNotMatch(first.blockReason || '', /CONFIRM-/);
 
-  // Simulate the out-of-band approval arriving before the retry.
-  const token = 'CONFIRM-HIGH01';
-  approvalQueue.request(sessionKey, 'FileSystem', 'write', { confirmationToken: token });
-  const resolved = approvalQueue.resolveByToken(token, 'approve');
-  assert.equal(resolved, true);
+  // Approve the new invocation through its exact trusted notification context.
+  interceptor.onBlockCallback = async (_session, _module, _method, request) => {
+    const token = approvalQueue.getNotificationInfo(request.handle).token;
+    assert.equal(approvalQueue.resolveByToken(token, 'approve'), true);
+    return true;
+  };
 
   const second = await hook(
     { toolName: 'write', params: { path: '/tmp/high-risk.txt', content: 'overwrite' } },
@@ -89,10 +90,12 @@ test('CATASTROPHIC action executes after OOB !approve with token', async () => {
   // Wrong token is rejected.
   assert.equal(approvalQueue.resolveByToken('CONFIRM-WRONG1', 'approve'), false);
 
-  // Correct token resolves a queued approval entry.
-  const token = 'CONFIRM-CAT01';
-  approvalQueue.request(sessionKey, 'Shell', 'bash', { confirmationToken: token });
-  assert.equal(approvalQueue.resolveByToken(token, 'approve'), true);
+  // Correct token resolves only this newly pending invocation.
+  interceptor.onBlockCallback = async (_session, _module, _method, request) => {
+    const token = approvalQueue.getNotificationInfo(request.handle).token;
+    assert.equal(approvalQueue.resolveByToken(token, 'approve'), true);
+    return true;
+  };
 
   const second = await hook(
     { toolName: 'bash', params: { command: 'rm -rf /' } },

@@ -78,6 +78,28 @@ When a rule has non-empty `allowPaths` or `denyPaths`, the adapter must supply a
 
 Local JSONL records are editable by users with filesystem access. Logging alone does not prove execution or evidence completeness. The Karotte example separately records policy decisions and simulated deliveries in protected task state, then checks both during grading.
 
+### Channel approval ownership and migration
+
+A channel approval belongs to one waiting invocation. Concurrent calls, including identical calls, receive separate tokens and require separate approvals. A retry creates a new request; it cannot consume a previous approval. Denial, notification failure, and the two-minute deadline invalidate only that request. The deadline includes notification delivery. Tokens are generated internally; `intervention.confirmationToken` remains supported for TTY prompts but is ignored in channel mode.
+
+Custom trusted notifiers must use the fourth `onBlockCallback` argument to look up the exact pending request:
+
+```ts
+interceptor.onBlockCallback = async (session, module, method, request) => {
+  const info = approvalQueue.getNotificationInfo(request.handle);
+  if (!info) return false;
+  return sendToHuman(session, info.summary || `${module}.${method}()`, info.token);
+};
+```
+
+`sendToHuman` is your trusted channel adapter and returns whether the notification was sent. Keep the request handle and token outside agent-visible messages. The bundled plugin supplies this adapter. Legacy queue calls that created unbound approvals or looked them up by session/module/method must migrate to handles; `consume` is removed. Three-argument callback functions remain callable, but slot-based token lookup is no longer supported.
+
+Channel ASK arguments must be plain JSON data, at most 64 levels deep and 1 MiB when serialized, including the outer argument array. Unsupported values, getters, proxies, cycles, sparse arrays, and custom object types are rejected. Object keys are canonicalized; array order and literal values remain significant. Reins keeps a detached immutable snapshot and checks the original arguments and current in-memory policy after approval and logging. Changes invalidate the approval. ALLOW, DENY, and TTY flows retain their existing argument contract.
+
+Notifications retain the existing summary display. Binding a notification to an invocation does not mean the human reviewed every parameter. The host must execute the checked arguments after `evaluate` succeeds; Reins does not prevent caller mutation after it returns, perform the effect, or automatically reload policy from disk.
+
+The [approval ownership audit](scripts/approval-audit/README.md) provides a reproducible 5,670-trace check of two concurrent requests against an independent queue model. Integration regressions run with `npm test`.
+
 ## Documentation
 
 Full docs at [reins.sh/docs](https://reins.sh/docs):
