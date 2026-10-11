@@ -76,6 +76,8 @@ Controls apply to actions routed through a configured integration. Review each a
 
 When a rule has non-empty `allowPaths` or `denyPaths`, the adapter must supply a non-empty string target. Missing or invalid targets are denied. Network and browser calls use `url` or `src`; file calls use `path`, `file_path`, or `target`.
 
+File path rules match a lexically normalized path in the Reins process. They do not resolve symlinks or guarantee confinement to a physical directory: a symlink inside an allowed path can point outside it or into a denied directory. The adapter must enforce any required filesystem boundary when it performs the operation, using the executing filesystem's path semantics. Browser and network targets are matched as URL strings.
+
 Local JSONL records are editable by users with filesystem access. Logging alone does not prove execution or evidence completeness. The Karotte example separately records policy decisions and simulated deliveries in protected task state, then checks both during grading.
 
 ### Channel approval ownership and migration
