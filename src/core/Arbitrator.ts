@@ -8,7 +8,7 @@
  *  3. Daemon without sessionKey       → auto-deny (fail-secure)
  */
 
-import inquirer from 'inquirer';
+import { prompt } from '../lib/prompt';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import { ExecutionContext } from '../types';
@@ -44,7 +44,7 @@ export class Arbitrator {
       return this.judgeTTYExplicitConfirmation(context);
     }
 
-    const answer = await inquirer.prompt([
+    const answer = await prompt([
       {
         type: 'list',
         name: 'decision',
@@ -86,7 +86,7 @@ export class Arbitrator {
     console.log(chalk.bold.cyan('Confirmation Token:'), chalk.white(token));
     console.log('');
 
-    const answer = await inquirer.prompt([
+    const answer = await prompt([
       {
         type: 'input',
         name: 'typed',

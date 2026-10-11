@@ -3,7 +3,7 @@
  * Interactive setup for Reins with OpenClaw + automation-friendly mode
  */
 
-import inquirer from 'inquirer';
+import { prompt } from '../lib/prompt';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
@@ -237,7 +237,7 @@ async function maybeOfferWatchtowerSchedule(): Promise<string | null> {
   console.log(chalk.green('✅ Connected to Reins Cloud!'));
   console.log('');
 
-  const { enableSchedule } = await inquirer.prompt([
+  const { enableSchedule } = await prompt([
     {
       type: 'confirm',
       name: 'enableSchedule',
@@ -297,7 +297,7 @@ export async function initWizard(options: InitWizardOptions = {}): Promise<InitS
   // Check if already registered
   const alreadyRegistered = await isPluginRegistered();
   if (alreadyRegistered && !nonInteractive) {
-    const { shouldReconfigure } = await inquirer.prompt([
+    const { shouldReconfigure } = await prompt([
       {
         type: 'confirm',
         name: 'shouldReconfigure',
@@ -333,7 +333,7 @@ export async function initWizard(options: InitWizardOptions = {}): Promise<InitS
       console.log('');
     }
 
-    const answer = await inquirer.prompt([
+    const answer = await prompt([
       {
         type: 'list',
         name: 'securityLevel',
@@ -400,7 +400,7 @@ export async function initWizard(options: InitWizardOptions = {}): Promise<InitS
       console.log('');
     }
 
-    const answer = await inquirer.prompt([
+    const answer = await prompt([
       {
         type: 'checkbox',
         name: 'selectedModules',
@@ -488,7 +488,7 @@ export async function initWizard(options: InitWizardOptions = {}): Promise<InitS
 
   // Step 7: Watchtower API key + Claude Code hooks (interactive only)
   if (!nonInteractive) {
-    const { connectWatchtower } = await inquirer.prompt([{
+    const { connectWatchtower } = await prompt([{
       type: 'confirm',
       name: 'connectWatchtower',
       message: '📡 Connect to Reins Cloud for centralized policy enforcement & observability?',
@@ -496,7 +496,7 @@ export async function initWizard(options: InitWizardOptions = {}): Promise<InitS
     }]);
 
     if (connectWatchtower) {
-      const { email } = await inquirer.prompt([{
+      const { email } = await prompt([{
         type: 'input',
         name: 'email',
         message: 'Your email address:',

@@ -52,6 +52,18 @@ function isNodeVersionVulnerable(version) {
   return compare(version, '22.14.0') < 0 || (compare(version, '23.0.0') >= 0 && compare(version, '23.6.1') < 0);
 }
 
+function assertWarningConfigurationExit(result) {
+  // The config has WARN findings, but the executing Node runtime can itself
+  // add a FAIL. Preserve the scanner's stricter exit status in that case.
+  const vulnerableRuntime = isNodeVersionVulnerable(process.versions.node);
+  const nodeStatus = vulnerableRuntime ? 'FAIL' : 'PASS';
+  assert.match(result.stdout, new RegExp(`\\b${nodeStatus}\\s+NODEJS_VERSION\\b`));
+  const failingChecks = [...result.stdout.matchAll(/^[^\r\n]*\bFAIL\s+([A-Z_]+)\s/gm)]
+    .map((match) => match[1]);
+  assert.deepEqual(failingChecks, vulnerableRuntime ? ['NODEJS_VERSION'] : []);
+  assert.equal(result.status, vulnerableRuntime ? 2 : 1, `stderr: ${result.stderr}`);
+}
+
 async function runScanner(openclawHome, homeDir = os.homedir()) {
   const previousOpenclawHome = process.env.OPENCLAW_HOME;
   const previousHome = process.env.HOME;
@@ -422,7 +434,7 @@ test('reins scan --fix --yes lists WARN findings when no auto-fixes are availabl
     OPENCLAW_HOME: openclawHome,
   });
 
-  assert.equal(result.status, 1, `stderr: ${result.stderr}`);
+  assertWarningConfigurationExit(result);
   assert.match(result.stdout, /No supported auto-fixes for the current findings\./);
   assert.match(result.stdout, /Manual review required for:/);
   assert.match(result.stdout, /HTTPS_TLS:/);
@@ -514,7 +526,7 @@ test('reins scan --monitor keeps comparing against the saved config baseline unt
     OPENCLAW_HOME: openclawHome,
   });
 
-  assert.equal(secondResult.status, 1, `stderr: ${secondResult.stderr}`);
+  assertWarningConfigurationExit(secondResult);
   assert.match(secondResult.stdout, /Configuration drift detected\./);
   assert.match(secondResult.stdout, /CONFIG CHANGED: tools\.exec\.safeBins/);
   assert.equal(readFileSync(baselinePath, 'utf8'), initialBaseline);
@@ -565,7 +577,7 @@ test('reins scan --monitor --reset-baseline replaces the saved config baseline',
     OPENCLAW_HOME: openclawHome,
   });
 
-  assert.equal(resetResult.status, 1, `stderr: ${resetResult.stderr}`);
+  assertWarningConfigurationExit(resetResult);
   assert.match(resetResult.stdout, /No drift detected since the previous scan\./);
 
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
@@ -576,7 +588,7 @@ test('reins scan --monitor --reset-baseline replaces the saved config baseline',
     OPENCLAW_HOME: openclawHome,
   });
 
-  assert.equal(followupResult.status, 1, `stderr: ${followupResult.stderr}`);
+  assertWarningConfigurationExit(followupResult);
   assert.doesNotMatch(followupResult.stdout, /CONFIG CHANGED: tools\.exec\.safeBins/);
 });
 
