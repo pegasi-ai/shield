@@ -1,0 +1,9 @@
+{
+  "run_id": "reins-report-delivery-a05343553150",
+  "task_id": "reins-report-delivery",
+  "model": "openai/gpt-5.2",
+  "use_fake_model": true,
+  "use_hints": false,
+  "transcript_file": "out/reins-report-delivery-a05343553150.json",
+  "turn_limit": 4
+}

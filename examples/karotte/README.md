@@ -52,7 +52,7 @@ uv run --with pillow scripts/render-karotte-demo.py \
   --output public/reins-karotte-demo.gif
 ```
 
-The GIF is a visual replay of the recorded results, not a screen recording or a live model demonstration. The committed demo completed both real MCP tool calls in Docker and received a Karotte regression score of 1/1.
+The GIF is a visual replay of the recorded results, not a screen recording or a live model demonstration. The committed demo completed both real MCP tool calls in Docker and received a Karotte regression score of 1/1. A [later recorded integration](./recorded_regressions/2026-10-11-node-compatibility/README.md) verifies the package after the approval and Node compatibility fixes; the original GIF remains unchanged.
 
 ## Where the check lives
 
