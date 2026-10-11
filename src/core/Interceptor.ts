@@ -167,7 +167,7 @@ export class Interceptor {
       const isChannelMode = !process.stdin.isTTY && sessionKey;
       const detail = effectiveRule.description || 'No description provided.';
 
-      if (isChannelMode) {
+      if (isChannelMode && effectiveRule.action === 'ASK') {
         const instructions = this.buildChannelInstructions(
           moduleName,
           methodName,
