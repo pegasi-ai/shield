@@ -75,6 +75,31 @@ Policy, helper code, tool code, and grader are outside the student-writable work
 
 For a broader task, add each supported action explicitly, protect its authoritative state, and test both allowed and denied effects through that same path. Keep model generalization tests separate from this scripted replay.
 
+## Check a remembered permission after revocation
+
+A remembered grant can lead an agent to request an action that the current policy
+forbids. [`remembered-permission.test.mjs`](../../test/remembered-permission.test.mjs)
+checks this boundary using real Reins decisions and a local simulated delivery file:
+
+```bash
+npm run build
+node --test test/remembered-permission.test.mjs
+```
+
+The test first verifies that the old policy allowed a destination, then explicitly
+constructs a new `Interceptor` with a trusted policy that revokes it. An unchanged
+memory record still says the old destination is authorized. Its delivery attempt
+is denied with no saved effect; delivery to the currently authorized destination
+succeeds exactly once. Memory content and an earlier `ALLOW` do not update the
+trusted policy.
+
+This is a scripted Reins regression with no model calls or Karotte runtime. It
+does not implement automatic policy refresh: the application must install the
+current policy. It also does not show that an agent learned the revocation.
+Measure remembered authority, attempted actions, and actual effects separately.
+The behavioral evaluator below counts a revoked attempt as unauthorized even
+when the guard successfully blocks its effect.
+
 ## Evaluate behavior separately from the scripted regression
 
 The quickstart's `DeliveryJudge` checks an exact two-call sequence: outside denied,
