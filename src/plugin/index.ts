@@ -201,8 +201,13 @@ export default {
       initNotifier(api.runtime, api.config, pluginConfig?.fallbackChannel);
 
       // Wire the notifier callback so Interceptor can trigger notifications.
-      interceptor.onBlockCallback = (sessionKey, moduleName, methodName) => {
-        return sendApprovalNotification(sessionKey, moduleName, methodName);
+      interceptor.onBlockCallback = (
+        sessionKey,
+        moduleName,
+        methodName,
+        request
+      ): Promise<boolean> => {
+        return sendApprovalNotification(sessionKey, moduleName, methodName, request);
       };
 
       // -------------------------------------------------------------------

@@ -11,9 +11,11 @@ import {
   SecurityRule,
   ExecutionContext,
   InterventionMetadata,
+  ApprovalCallback,
 } from '../types';
 import { DEFAULT_POLICY } from '../config';
 import { Arbitrator } from './Arbitrator';
+import { bindApprovalArguments, ApprovalBinding } from './ApprovalBinding';
 import { DecisionLog, DecisionRecord } from '../storage/DecisionLog';
 import { StatsTracker } from '../storage/StatsTracker';
 import { trustRateLimiter } from './TrustRateLimiter';
@@ -50,14 +52,15 @@ function matchesGlob(pattern: string, str: string): boolean {
 
 /**
  * Extract the path or URL that a tool call is targeting, for path-policy evaluation.
- * Returns null if no target can be determined (policy check is skipped).
+ * Returns null if no usable string target can be determined.
  */
 function extractTarget(moduleName: string, params: Record<string, unknown>): string | null {
-  if (moduleName === 'Browser' || moduleName === 'Network') {
-    return (params.url ?? params.src ?? null) as string | null;
-  }
-  const raw = (params.path ?? params.file_path ?? params.target ?? null) as string | null;
-  if (!raw) return null;
+  const isUrl = moduleName === 'Browser' || moduleName === 'Network';
+  const raw = isUrl
+    ? (params.url ?? params.src)
+    : (params.path ?? params.file_path ?? params.target);
+  if (typeof raw !== 'string' || raw.length === 0) return null;
+  if (isUrl) return raw;
   // Expand ~ before resolving so ~/.ssh/id_rsa becomes /home/user/.ssh/id_rsa
   return path.resolve(expandTilde(raw));
 }
@@ -66,24 +69,21 @@ function extractTarget(moduleName: string, params: Record<string, unknown>): str
  * Apply allowPaths / denyPaths from the rule against the actual target.
  * Returns a DENY rule if the path is out of bounds, otherwise returns the rule unchanged.
  */
-function applyPathPolicy(
-  rule: SecurityRule,
-  moduleName: string,
-  args: unknown[]
-): SecurityRule {
+function applyPathPolicy(rule: SecurityRule, moduleName: string, args: unknown[]): SecurityRule {
   if (!rule.allowPaths?.length && !rule.denyPaths?.length) return rule;
 
-  const params = (args[0] as Record<string, unknown>) ?? {};
+  const first = args[0];
+  const params =
+    first !== null && typeof first === 'object' && !Array.isArray(first)
+      ? (first as Record<string, unknown>)
+      : {};
   const target = extractTarget(moduleName, params);
 
   if (!target) {
-    // Path filtering is configured but no recognisable path param was found.
-    // Log a warning so this silent bypass is visible in the audit trail.
-    logger.warn(
-      `applyPathPolicy: path filtering configured for ${moduleName} but no target path found in params — filtering skipped`,
-      { params }
-    );
-    return rule;
+    return {
+      action: 'DENY',
+      description: 'Path policy requires a non-empty string target',
+    };
   }
 
   // denyPaths take precedence over allowPaths.
@@ -113,10 +113,10 @@ export class Interceptor {
   private logEnabled: boolean;
 
   /**
-   * Optional callback fired (fire-and-forget) when a tool is blocked in channel mode.
-   * The plugin sets this to send an OOB approval notification to the human.
+   * Trusted callback awaited within the approval deadline in channel mode.
+   * Its fourth argument identifies the exact invocation for the notifier.
    */
-  public onBlockCallback?: (sessionKey: string, moduleName: string, methodName: string) => Promise<boolean>;
+  public onBlockCallback?: ApprovalCallback;
 
   constructor(policy?: SecurityPolicy, logEnabled: boolean = true) {
     this.policy = policy || DEFAULT_POLICY;
@@ -135,9 +135,34 @@ export class Interceptor {
     intervention?: InterventionMetadata
   ): Promise<void> {
     const baseRule = this.lookupRule(moduleName, methodName);
+    // Bind before target extraction so unsupported ASK args cannot execute getters.
+    const mayAskInChannel =
+      !process.stdin.isTTY &&
+      !!sessionKey &&
+      (baseRule.action === 'ASK' || (baseRule.action === 'ALLOW' && !!intervention?.forceAsk));
+    let argumentBinding: ApprovalBinding | undefined;
+    if (mayAskInChannel) {
+      try {
+        argumentBinding = bindApprovalArguments(args);
+      } catch {
+        await this.logDecision({
+          timestamp: new Date().toISOString(),
+          module: moduleName,
+          method: methodName,
+          args: [],
+          decision: 'REJECTED',
+          decisionTime: 0,
+          reason: 'Unsupported channel approval arguments (plain JSON, depth 64, 1 MiB required)',
+        });
+        throw new Error(
+          `Reins Security Violation: ${moduleName}.${methodName}() has invalid channel approval arguments`
+        );
+      }
+    }
+    const checkedArgs = argumentBinding ? (argumentBinding.snapshot as unknown[]) : args;
     // Path-policy check runs before intervention so a denied path is never
     // upgradeable to ASK — it's a hard DENY.
-    const originalRule = applyPathPolicy(baseRule, moduleName, args);
+    const originalRule = applyPathPolicy(baseRule, moduleName, checkedArgs);
 
     const normalizedIntervention = this.normalizeIntervention(
       moduleName,
@@ -152,24 +177,83 @@ export class Interceptor {
       normalizedIntervention
     );
 
+    let approvalGuard: (() => boolean) | undefined;
+    let approvalBinding: string | undefined;
+    if (argumentBinding && effectiveRule.action === 'ASK') {
+      const policyBinding = this.approvalPolicyBinding(
+        baseRule,
+        effectiveRule,
+        normalizedIntervention
+      );
+      const boundArgs = argumentBinding.canonical;
+      approvalBinding = crypto
+        .createHash('sha256')
+        .update(boundArgs)
+        .update('\n')
+        .update(policyBinding)
+        .digest('hex');
+      approvalGuard = (): boolean => {
+        try {
+          if (bindApprovalArguments(args).canonical !== boundArgs) return false;
+          const currentBase = this.lookupRule(moduleName, methodName);
+          const currentOriginal = applyPathPolicy(currentBase, moduleName, checkedArgs);
+          const currentIntervention = this.normalizeIntervention(
+            moduleName,
+            methodName,
+            currentOriginal,
+            intervention
+          );
+          const currentEffective = this.applyInterventionToRule(
+            currentOriginal,
+            moduleName,
+            methodName,
+            currentIntervention
+          );
+          return (
+            currentEffective.action === 'ASK' &&
+            this.approvalPolicyBinding(currentBase, currentEffective, currentIntervention) ===
+              policyBinding
+          );
+        } catch {
+          return false;
+        }
+      };
+    }
+
     if (this.logEnabled) {
       this.logInterception(moduleName, methodName, effectiveRule.action);
     }
 
-    const allowed = await this.executeDecision(
+    let allowed = await this.executeDecision(
       effectiveRule,
       moduleName,
       methodName,
-      args,
+      checkedArgs,
       sessionKey,
-      normalizedIntervention
+      normalizedIntervention,
+      approvalGuard,
+      approvalBinding
     );
+
+    // This is the last successful-path check after every asynchronous decision/log step.
+    if (allowed && approvalGuard && !approvalGuard()) {
+      allowed = false;
+      await this.logDecision({
+        timestamp: new Date().toISOString(),
+        module: moduleName,
+        method: methodName,
+        args: checkedArgs,
+        decision: 'REJECTED',
+        decisionTime: 0,
+        reason: 'Channel approval invalidated: arguments or current policy changed',
+      });
+    }
 
     if (!allowed) {
       const isChannelMode = !process.stdin.isTTY && sessionKey;
       const detail = effectiveRule.description || 'No description provided.';
 
-      if (isChannelMode) {
+      if (isChannelMode && effectiveRule.action === 'ASK') {
         const instructions = this.buildChannelInstructions(
           moduleName,
           methodName,
@@ -177,7 +261,7 @@ export class Interceptor {
         );
 
         throw new Error(
-          `[Reins:APPROVAL_REQUIRED] ${moduleName}.${methodName}() is blocked pending human approval. ` +
+          `[Reins:APPROVAL_REQUIRED] ${moduleName}.${methodName}() was blocked without a usable invocation approval. ` +
             `Risk: ${detail}\n` +
             instructions
         );
@@ -187,6 +271,24 @@ export class Interceptor {
         `Reins Security Violation: ${moduleName}.${methodName}() was DENIED. ${detail}`
       );
     }
+  }
+
+  private approvalPolicyBinding(
+    baseRule: SecurityRule,
+    effectiveRule: SecurityRule,
+    intervention?: InterventionMetadata
+  ): string {
+    const defined = (value: object): Record<string, unknown> =>
+      Object.fromEntries(
+        Object.entries(value).filter(
+          ([key, item]) => item !== undefined && key !== 'confirmationToken'
+        )
+      );
+    return bindApprovalArguments({
+      baseRule: defined(baseRule),
+      effectiveRule: defined(effectiveRule),
+      intervention: defined(intervention || {}),
+    }).canonical;
   }
 
   private normalizeIntervention(
@@ -278,16 +380,16 @@ export class Interceptor {
         `${screenshotInstruction}` +
         `⚠️ HIGH-RISK action requires explicit human confirmation.\n` +
         `Action: ${summary}\n` +
-        `An out-of-band approval notification has been sent to the human.\n` +
-        `WAIT — do NOT retry this tool. Do NOT attempt to self-approve.`
+        `This invocation did not receive a usable approval. A new call requires its own approval.\n` +
+        `Do NOT attempt to self-approve.`
       );
     }
 
     return (
       `${screenshotInstruction}` +
       `Action: ${summary}\n` +
-      `An approval request has been sent to the human out-of-band.\n` +
-      `WAIT for their response before retrying. Do NOT attempt to self-approve.`
+      `This invocation did not receive a usable approval. A new call requires its own approval.\n` +
+      `Do NOT attempt to self-approve.`
     );
   }
 
@@ -310,7 +412,9 @@ export class Interceptor {
     methodName: string,
     args: unknown[],
     sessionKey?: string,
-    intervention?: InterventionMetadata
+    intervention?: InterventionMetadata,
+    approvalGuard?: () => boolean,
+    approvalBinding?: string
   ): Promise<boolean> {
     const startTime = Date.now();
 
@@ -352,9 +456,12 @@ export class Interceptor {
           sessionKey,
           intervention,
           onBlockCallback: this.onBlockCallback,
+          approvalBinding,
         };
 
-        const approved = await this.arbitrator.judge(context);
+        let approved = await this.arbitrator.judge(context);
+        const invalidated = approved && approvalGuard && !approvalGuard();
+        if (invalidated) approved = false;
         const decisionTime = Date.now() - startTime;
 
         if (!approved && process.stdin.isTTY) {
@@ -370,7 +477,9 @@ export class Interceptor {
           args,
           decision: approved ? 'APPROVED' : 'REJECTED',
           userId: 'human',
-          reason: rule.description,
+          reason: invalidated
+            ? 'Channel approval invalidated: arguments or current policy changed'
+            : rule.description,
           decisionTime,
         });
 

@@ -68,7 +68,9 @@ export function createApproveCommand(): CommandDefinition {
       }
 
       logger.info('[approval-cmd] Approved by token', { token, from: ctx.from });
-      return { text: '✅ Approved. The action will proceed.' };
+      return {
+        text: '✅ Approval recorded for this invocation. Reins will recheck it before allowing execution.',
+      };
     },
   };
 }

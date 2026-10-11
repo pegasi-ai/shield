@@ -4,7 +4,7 @@
 
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
-import inquirer from 'inquirer';
+import { prompt } from '../lib/prompt';
 import chalk from 'chalk';
 import os from 'os';
 import path from 'path';
@@ -220,7 +220,7 @@ async function maybeOfferFix(
     return;
   }
 
-  const { applyFixes } = await inquirer.prompt([
+  const { applyFixes } = await prompt([
     {
       type: 'confirm',
       name: 'applyFixes',
@@ -560,7 +560,7 @@ async function confirmFix(): Promise<boolean> {
     throw new Error('Fix mode requires --yes when stdin is not interactive');
   }
 
-  const { confirmed } = await inquirer.prompt([
+  const { confirmed } = await prompt([
     {
       type: 'confirm',
       name: 'confirmed',
@@ -839,7 +839,7 @@ async function maybeConnectWatchtowerInteractively(
 
   console.log(chalk.bold('Watchtower Setup:'));
 
-  const { shouldConnect } = await inquirer.prompt([
+  const { shouldConnect } = await prompt([
     {
       type: 'confirm',
       name: 'shouldConnect',
@@ -853,7 +853,7 @@ async function maybeConnectWatchtowerInteractively(
     return null;
   }
 
-  const { email } = await inquirer.prompt([
+  const { email } = await prompt([
     {
       type: 'input',
       name: 'email',

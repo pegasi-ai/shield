@@ -1,3 +1,5 @@
+import type { ApprovalRequestContext } from './core/ApprovalQueue';
+
 /**
  * Reins type definitions.
  */
@@ -19,12 +21,17 @@ export interface SecurityRule {
   /**
    * Glob patterns for allowed paths/URLs.
    * If set, the target path/URL MUST match at least one pattern or the call is DENIED.
+   * A missing, empty, or non-string target is DENIED when path restrictions are configured.
+   * File paths are lexically normalized; symlinks are not resolved. Adapters must
+   * enforce any required physical filesystem confinement when executing the operation.
    * Examples: ["/workspace/**", "/tmp/**"], ["https://api.example.com/**"]
    */
   allowPaths?: string[];
   /**
    * Glob patterns for denied paths/URLs.
    * If the target path/URL matches ANY of these, the call is DENIED regardless of allowPaths.
+   * A missing, empty, or non-string target is DENIED when path restrictions are configured.
+   * Symlink aliases are not resolved to their physical targets before matching.
    * Examples: ["/etc/GLOB", "~/.ssh/GLOB", "GLOB/.env"]  (GLOB = **)
    */
   denyPaths?: string[];
@@ -54,8 +61,8 @@ export interface InterventionMetadata {
   /** Human-readable summary of the action that needs explicit confirmation. */
   actionSummary?: string;
   /**
-   * Confirmation token shown to the user/agent. If omitted, one is generated
-   * per request.
+   * Confirmation token for TTY prompts. Channel mode ignores this value and
+   * generates a fresh token internally for each invocation.
    */
   confirmationToken?: string;
   /**
@@ -91,5 +98,15 @@ export interface ExecutionContext {
   /** Called once when a tool is blocked to fire the OOB approval notification.
    *  Returns true if a notification was actually dispatched (channel context found),
    *  false if no channel is available (e.g. TUI sessions). */
-  onBlockCallback?: (sessionKey: string, moduleName: string, methodName: string) => Promise<boolean>;
+  onBlockCallback?: ApprovalCallback;
+  /** Trusted invocation binding supplied by Interceptor for channel approval. */
+  approvalBinding?: string;
 }
+
+/** The fourth argument identifies the exact invocation for a trusted notifier. */
+export type ApprovalCallback = (
+  sessionKey: string,
+  moduleName: string,
+  methodName: string,
+  request: ApprovalRequestContext
+) => Promise<boolean>;

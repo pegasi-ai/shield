@@ -2,7 +2,7 @@
  * Reins Policy Management Command
  */
 
-import inquirer from 'inquirer';
+import { prompt } from '../../lib/prompt';
 import chalk from 'chalk';
 import { PolicyStore, PersistedPolicy } from '../../storage/PolicyStore';
 import { logger } from '../../core/Logger';
@@ -45,7 +45,7 @@ export async function policyCommand(): Promise<void> {
     console.log('');
 
     // Action menu
-    const { action } = await inquirer.prompt([
+    const { action } = await prompt([
       {
         type: 'list',
         name: 'action',
@@ -85,7 +85,7 @@ export async function policyCommand(): Promise<void> {
 }
 
 async function changeDefaultLevel(policy: PersistedPolicy): Promise<void> {
-  const { newDefault } = await inquirer.prompt([
+  const { newDefault } = await prompt([
     {
       type: 'list',
       name: 'newDefault',
@@ -114,7 +114,7 @@ async function modifyRule(policy: PersistedPolicy): Promise<void> {
     return;
   }
 
-  const { moduleName } = await inquirer.prompt([
+  const { moduleName } = await prompt([
     {
       type: 'list',
       name: 'moduleName',
@@ -125,7 +125,7 @@ async function modifyRule(policy: PersistedPolicy): Promise<void> {
 
   const methods = Object.keys(policy.modules[moduleName]);
 
-  const { methodName } = await inquirer.prompt([
+  const { methodName } = await prompt([
     {
       type: 'list',
       name: 'methodName',
@@ -136,7 +136,7 @@ async function modifyRule(policy: PersistedPolicy): Promise<void> {
 
   const currentRule = policy.modules[moduleName][methodName];
 
-  const { newAction, newDescription, newAllowPaths, newDenyPaths } = await inquirer.prompt([
+  const { newAction, newDescription, newAllowPaths, newDenyPaths } = await prompt([
     {
       type: 'list',
       name: 'newAction',
@@ -177,7 +177,7 @@ async function modifyRule(policy: PersistedPolicy): Promise<void> {
 }
 
 async function addModule(policy: PersistedPolicy): Promise<void> {
-  const { moduleName, defaultAction } = await inquirer.prompt([
+  const { moduleName, defaultAction } = await prompt([
     {
       type: 'input',
       name: 'moduleName',
@@ -203,7 +203,7 @@ async function addModule(policy: PersistedPolicy): Promise<void> {
 }
 
 async function resetPolicy(): Promise<void> {
-  const { confirm } = await inquirer.prompt([
+  const { confirm } = await prompt([
     {
       type: 'confirm',
       name: 'confirm',

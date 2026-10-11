@@ -2,7 +2,7 @@
  * ClawReins Reset Command
  */
 
-import inquirer from 'inquirer';
+import { prompt } from '../../lib/prompt';
 import chalk from 'chalk';
 import { StatsTracker } from '../../storage/StatsTracker';
 import { logger } from '../../core/Logger';
@@ -13,7 +13,7 @@ export async function resetCommand(): Promise<void> {
   console.log('');
 
   try {
-    const { confirm } = await inquirer.prompt([
+    const { confirm } = await prompt([
       {
         type: 'confirm',
         name: 'confirm',

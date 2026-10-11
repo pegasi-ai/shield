@@ -18,7 +18,7 @@
 
 > In Greek myth, Athena gave Bellerophon the golden bridle — reins included — that let him guide Pegasus. Reins applies the same idea to AI agents: raw power is not enough — what matters is making it controllable.
 
-Reins enforces deterministic security policies on every agent action, scans your configs for OWASP ASI10 vulnerabilities, and tracks drift over time. Policies evaluate in under 50ms. Works with Claude Code PreToolUse and PostToolUse hooks, OpenClaw, and any MCP-compatible agent.
+Reins checks agent tool calls against configurable security policies, scans agent configs, and tracks configuration drift. Integrations include Claude Code hooks and OpenClaw. Custom tool adapters can call the policy engine directly.
 
 ## Quickstart
 
@@ -26,6 +26,25 @@ Reins enforces deterministic security policies on every agent action, scans your
 npm install -g @pegasi-ai/reins
 reins init
 ```
+
+### Try a policy check without an agent or API key
+
+From a clone of this repository, using Node.js 22.12 or newer:
+
+```bash
+npm ci --ignore-scripts
+npm run demo:karotte:policy
+```
+
+Watch Reins deny an outside recipient, allow the authorized team, and verify the saved simulated delivery. To run the same scenario through a real RL environment, install uv, start Docker, and run `npm run demo:karotte`.
+
+### Reins + Karotte
+
+Reins controls a scoped publishing tool; [Karotte](https://github.com/preferencemodel/karotte) runs the task and grades its protected delivery record. The keyless replay verifies both an enforced denial and authorized completion.
+
+![Reins and Karotte scripted regression](./public/reins-karotte-demo.gif)
+
+This GIF presents a recorded scripted regression. Delivery is simulated; no real email is sent. See the [quickstart, implementation, and boundaries](./examples/karotte/README.md).
 
 ## Claude Code Skill
 
@@ -49,15 +68,39 @@ An OpenClaw agent tries to bulk-delete 4,382 Gmail messages. Reins blocks it bef
 
 - **Prevent** — Block destructive actions before execution. Score irreversibility. Detect risky browser state.
 - **Pause** — Route high-impact actions through terminal or messaging approval flows. Require explicit `CONFIRM-*` tokens for catastrophic operations.
-- **Prove** — Preserve an immutable audit trail of every decision, approval, and block.
+- **Record** - Keep local decision records for inspection and debugging.
 
-## Security guarantees
+## Security scope
 
-- **Zero Trust** — every action evaluated before execution
-- **Synchronous** — agent cannot proceed until the hook exits
-- **No network in the hot path** — policies cached locally, enforced offline
-- **Fail-closed** — any unhandled hook error blocks the action
-- **Immutable audit** — append-only JSONL at `~/.openclaw/reins/decisions.jsonl`
+Controls apply to actions routed through a configured integration. Review each adapter's error handling, tool coverage, policy defaults, and approval behavior before relying on it. An alternate tool or unrestricted shell can bypass a scoped adapter.
+
+When a rule has non-empty `allowPaths` or `denyPaths`, the adapter must supply a non-empty string target. Missing or invalid targets are denied. Network and browser calls use `url` or `src`; file calls use `path`, `file_path`, or `target`.
+
+File path rules match a lexically normalized path in the Reins process. They do not resolve symlinks or guarantee confinement to a physical directory: a symlink inside an allowed path can point outside it or into a denied directory. The adapter must enforce any required filesystem boundary when it performs the operation, using the executing filesystem's path semantics. Browser and network targets are matched as URL strings.
+
+Local JSONL records are editable by users with filesystem access. Logging alone does not prove execution or evidence completeness. The Karotte example separately records policy decisions and simulated deliveries in protected task state, then checks both during grading.
+
+### Channel approval ownership and migration
+
+A channel approval belongs to one waiting invocation. Concurrent calls, including identical calls, receive separate tokens and require separate approvals. A retry creates a new request; it cannot consume a previous approval. Denial, notification failure, and the two-minute deadline invalidate only that request. The deadline includes notification delivery. Tokens are generated internally; `intervention.confirmationToken` remains supported for TTY prompts but is ignored in channel mode.
+
+Custom trusted notifiers must use the fourth `onBlockCallback` argument to look up the exact pending request:
+
+```ts
+interceptor.onBlockCallback = async (session, module, method, request) => {
+  const info = approvalQueue.getNotificationInfo(request.handle);
+  if (!info) return false;
+  return sendToHuman(session, info.summary || `${module}.${method}()`, info.token);
+};
+```
+
+`sendToHuman` is your trusted channel adapter and returns whether the notification was sent. Keep the request handle and token outside agent-visible messages. The bundled plugin supplies this adapter. Legacy queue calls that created unbound approvals or looked them up by session/module/method must migrate to handles; `consume` is removed. Three-argument callback functions remain callable, but slot-based token lookup is no longer supported.
+
+Channel ASK arguments must be plain JSON data, at most 64 levels deep and 1 MiB when serialized, including the outer argument array. Unsupported values, getters, proxies, cycles, sparse arrays, and custom object types are rejected. Object keys are canonicalized; array order and literal values remain significant. Reins keeps a detached immutable snapshot and checks the original arguments and current in-memory policy after approval and logging. Changes invalidate the approval. ALLOW, DENY, and TTY flows retain their existing argument contract.
+
+Notifications retain the existing summary display. Binding a notification to an invocation does not mean the human reviewed every parameter. The host must execute the checked arguments after `evaluate` succeeds; Reins does not prevent caller mutation after it returns, perform the effect, or automatically reload policy from disk.
+
+The [approval ownership audit](scripts/approval-audit/README.md) provides a reproducible 5,670-trace check of two concurrent requests against an independent queue model. Integration regressions run with `npm test`.
 
 ## Documentation
 
