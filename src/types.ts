@@ -19,12 +19,14 @@ export interface SecurityRule {
   /**
    * Glob patterns for allowed paths/URLs.
    * If set, the target path/URL MUST match at least one pattern or the call is DENIED.
+   * A missing, empty, or non-string target is DENIED when path restrictions are configured.
    * Examples: ["/workspace/**", "/tmp/**"], ["https://api.example.com/**"]
    */
   allowPaths?: string[];
   /**
    * Glob patterns for denied paths/URLs.
    * If the target path/URL matches ANY of these, the call is DENIED regardless of allowPaths.
+   * A missing, empty, or non-string target is DENIED when path restrictions are configured.
    * Examples: ["/etc/GLOB", "~/.ssh/GLOB", "GLOB/.env"]  (GLOB = **)
    */
   denyPaths?: string[];

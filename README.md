@@ -74,6 +74,8 @@ An OpenClaw agent tries to bulk-delete 4,382 Gmail messages. Reins blocks it bef
 
 Controls apply to actions routed through a configured integration. Review each adapter's error handling, tool coverage, policy defaults, and approval behavior before relying on it. An alternate tool or unrestricted shell can bypass a scoped adapter.
 
+When a rule has non-empty `allowPaths` or `denyPaths`, the adapter must supply a non-empty string target. Missing or invalid targets are denied. Network and browser calls use `url` or `src`; file calls use `path`, `file_path`, or `target`.
+
 Local JSONL records are editable by users with filesystem access. Logging alone does not prove execution or evidence completeness. The Karotte example separately records policy decisions and simulated deliveries in protected task state, then checks both during grading.
 
 ## Documentation

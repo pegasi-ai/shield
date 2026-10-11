@@ -50,14 +50,15 @@ function matchesGlob(pattern: string, str: string): boolean {
 
 /**
  * Extract the path or URL that a tool call is targeting, for path-policy evaluation.
- * Returns null if no target can be determined (policy check is skipped).
+ * Returns null if no usable string target can be determined.
  */
 function extractTarget(moduleName: string, params: Record<string, unknown>): string | null {
-  if (moduleName === 'Browser' || moduleName === 'Network') {
-    return (params.url ?? params.src ?? null) as string | null;
-  }
-  const raw = (params.path ?? params.file_path ?? params.target ?? null) as string | null;
-  if (!raw) return null;
+  const isUrl = moduleName === 'Browser' || moduleName === 'Network';
+  const raw = isUrl
+    ? (params.url ?? params.src)
+    : (params.path ?? params.file_path ?? params.target);
+  if (typeof raw !== 'string' || raw.length === 0) return null;
+  if (isUrl) return raw;
   // Expand ~ before resolving so ~/.ssh/id_rsa becomes /home/user/.ssh/id_rsa
   return path.resolve(expandTilde(raw));
 }
@@ -66,24 +67,21 @@ function extractTarget(moduleName: string, params: Record<string, unknown>): str
  * Apply allowPaths / denyPaths from the rule against the actual target.
  * Returns a DENY rule if the path is out of bounds, otherwise returns the rule unchanged.
  */
-function applyPathPolicy(
-  rule: SecurityRule,
-  moduleName: string,
-  args: unknown[]
-): SecurityRule {
+function applyPathPolicy(rule: SecurityRule, moduleName: string, args: unknown[]): SecurityRule {
   if (!rule.allowPaths?.length && !rule.denyPaths?.length) return rule;
 
-  const params = (args[0] as Record<string, unknown>) ?? {};
+  const first = args[0];
+  const params =
+    first !== null && typeof first === 'object' && !Array.isArray(first)
+      ? (first as Record<string, unknown>)
+      : {};
   const target = extractTarget(moduleName, params);
 
   if (!target) {
-    // Path filtering is configured but no recognisable path param was found.
-    // Log a warning so this silent bypass is visible in the audit trail.
-    logger.warn(
-      `applyPathPolicy: path filtering configured for ${moduleName} but no target path found in params — filtering skipped`,
-      { params }
-    );
-    return rule;
+    return {
+      action: 'DENY',
+      description: 'Path policy requires a non-empty string target',
+    };
   }
 
   // denyPaths take precedence over allowPaths.
